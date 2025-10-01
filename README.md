@@ -21,8 +21,7 @@ Yeah, a TUI doesn't need to be a thing. However, I've wanted to make a TUI for a
 
 ## TODO's
 
-- Generate BRL file for a selected series
-    - maybe search for series and download as brl?
+- maybe search for series and download as brl?
 
 - Search for book to add to `want-to-read`.
 
@@ -34,4 +33,6 @@ Yeah, a TUI doesn't need to be a thing. However, I've wanted to make a TUI for a
     - use a local db such as DuckDB?
     - Won't matter for series downloaded as BRL file (yes I will push this as much as possible, i think it would be helpful.)
 
-- split books futher into want to read and read lists
+- Book Editor Modal
+
+- Better onboarding Modal
