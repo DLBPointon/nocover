@@ -1,6 +1,3 @@
-import io
-import sys
-
 class Book:
     def __init__(self, book_dict):
         self.book_name          = book_dict["book"]["default_cover_edition"]["book"]["title"]
@@ -9,8 +6,8 @@ class Book:
         self.book_isbn13        = self.get_isbn13(book_dict)
         self.book_tags          = self.clean_book_tags(book_dict["book"]["taggings"])
         release_data: str       = book_dict["book"]["default_cover_edition"]["book"]["release_date"]
-        self.release_year       = "0000" if release_data == None else release_data.split("-")[0]
-        self.series_position    = 10000 if book_dict["position"] == None else book_dict["position"]
+        self.release_year       = "0000" if release_data is None else release_data.split("-")[0]
+        self.series_position    = 10000 if book_dict["position"] is None else book_dict["position"]
         self.series_pos_details = book_dict["details"]
 
 

@@ -1,7 +1,6 @@
 # General Package Imports
 import os
 import json
-from asyncio import sleep
 
 # Textual Package Import
 from textual.app import App, ComposeResult
@@ -177,7 +176,7 @@ class DetailsPanel(Static):
             f"Series belongs to the {universe_tag["@Name"]} Universe {
                 (
                     ""
-                    if universe_tag["@Position"] == None
+                    if universe_tag["@Position"] is None
                     else f"(Position: {universe_tag["@Position"]})"
                 )
             }"
@@ -294,11 +293,6 @@ class DetailsPanel(Static):
             row: Horizontal = Horizontal(classes="detail-row")
             container.mount(row)
 
-            if key.lower() in ["biography", "description"]:
-                value_classes = "detail-value-big"
-            else:
-                value_classes = "detail-value"
-
             new_key = " ".join(key.split("_"))
 
             # now we can mount children into the row
@@ -389,7 +383,7 @@ class MainContainer(TabbedContent):
     def compose(self) -> ComposeResult:
         with TabbedContent(initial="list_books", id="tab_panel"):
             with TabPane("Books", id="list_books"):
-                with TabbedContent(initial=f"status-want-to-read"):
+                with TabbedContent(initial="status-want-to-read"):
                     for status, titles in self.book_by_Status.items():
                         with TabPane(
                             title=status.title(), id=f"status-{status.lower()}"

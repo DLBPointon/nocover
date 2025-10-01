@@ -1,9 +1,6 @@
 import json
 import xmltodict
 
-from nocover.config import Config
-from nocover.general_functions import get_remote_data
-
 class SeriesData:
     """
     Reads data from brl file to populate Details Panel

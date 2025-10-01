@@ -104,7 +104,7 @@ class SeriesAddModal(ModalScreen):
         book_list = []
         ghosts = []
         for i in data:
-            if i["book"]["default_cover_edition"] == None:
+            if i["book"]["default_cover_edition"] is None:
                 ghosts.append(i["book"]["slug"])
             else:
                 book_list.append(i)
@@ -156,12 +156,12 @@ class SeriesAddModal(ModalScreen):
         add_comp = self.query_one("#opt_compilations", Checkbox).value
         add_ghosts = self.query_one("#opt_ghosts", Checkbox).value
 
-        if add_ghosts == False:
+        if not add_ghosts:
             no_ghosts, yes_ghosts = self.remove_ghosts(data)
             out_data = self.remove_editions(no_ghosts)
 
         yes_compilations = []
-        if add_comp == False:
+        if not add_comp:
             out_data, yes_compilations = self.remove_compilations(out_data)
 
         return out_data, yes_ghosts, yes_compilations

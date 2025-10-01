@@ -1,8 +1,7 @@
 import datetime
 
-from xml.dom import minidom
 from xml.etree import ElementTree
-from xml.etree.ElementTree import Element, SubElement, Comment, indent, canonicalize
+from xml.etree.ElementTree import Element, SubElement, Comment, indent
 
 def generate_brl_file(
     book_list: list[dict[str,str]],
@@ -85,21 +84,23 @@ def output_brl(
                 )
 
     if universe:
-        universe_group = SubElement(
-                        series, 'Universe',
-                        {
-                            'Name': universe,
-                            'Position': universe_position
-                        },
-                    )
+        # Universe Data
+        SubElement(
+            series, 'Universe',
+            {
+                'Name': universe,
+                'Position': universe_position
+            },
+        )
 
-    series_dv = SubElement(
-                    series, 'Database',
-                    {
-                        'Name': "Hardcover",
-                        'Item': series_data["series_slug"]
-                    },
-                )
+    # Series Data
+    SubElement(
+        series, 'Database',
+        {
+            'Name': "Hardcover",
+            'Item': series_data["series_slug"]
+        },
+    )
 
     series_descrption = SubElement(
                     series, "Description",
@@ -112,7 +113,7 @@ def output_brl(
 
     books = SubElement(root2, 'Books')
 
-    book_element_maker = [
+    [
         book_maker(
             books, i, tags
         ) for i in book_data
@@ -122,6 +123,7 @@ def output_brl(
 
     root_tree = ElementTree.ElementTree(root)
 
+    # This is effectively to touch file for writing
     with open(save_location, mode="w") as tmp:
         pass
 
