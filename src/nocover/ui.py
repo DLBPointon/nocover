@@ -7,7 +7,7 @@ from textual.app import App, ComposeResult
 from textual.screen import ModalScreen, Screen
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, HorizontalScroll,VerticalScroll
-from textual.widgets import Label, TabbedContent, TabPane, ListItem, ListView
+from textual.widgets import Label, TabbedContent, TabPane, ListView
 from textual.widgets import Footer, Button, Input, Static, Link
 
 # Local App Imports
@@ -16,7 +16,7 @@ from nocover.config import Config
 from nocover.list_items import BookListItem, SeriesListItem, ListListItem, PromptListItem, ProfilePublicListItem, ProfileBooksListItem, ProfilePersonalListItem
 
 # Local App Modal Imports
-from nocover.modals.start_up import StartUp
+# from nocover.modals.start_up import StartUp
 from nocover.modals.help_page import HelpModal
 from nocover.modals.error_page import ErrorModal
 from nocover.modals.series_add_modal import SeriesAddModal

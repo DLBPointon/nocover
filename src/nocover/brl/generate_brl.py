@@ -124,7 +124,7 @@ def output_brl(
     root_tree = ElementTree.ElementTree(root)
 
     # This is effectively to touch file for writing
-    with open(save_location, mode="w") as tmp:
+    with open(save_location, mode="w") as tmp: # noqa: F841
         pass
 
     root_tree.write(
