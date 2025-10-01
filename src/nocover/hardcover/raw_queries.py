@@ -31,53 +31,6 @@ HARDCOVER_PROFILE_QUERY="""
 }
 """
 
-HARDCOVER_READ_QUERY="""
-{
-  users(where: {email: {_eq: "damonlbp@hotmail.co.uk"}}) {
-    username
-    books_count
-    name
-    user_books {
-      book {
-        slug
-        title
-        release_year
-        pages
-        rating
-        description
-        book_series {
-          series {
-            slug
-            id
-            primary_books_count
-            creator {
-              name
-            }
-          }
-        }
-        activities_count
-        image {
-          url
-        }
-        taggings {
-          tag {
-            tag
-          }
-        }
-      }
-      date_added
-      last_read_date
-      likes_count
-      read_count
-      review
-      review_object
-      has_review
-    }
-    onboarded
-  }
-}
-"""
-
 HARDCOVER_USER_BOOKS_BY_STATUS = """
 {
   me {
@@ -112,7 +65,7 @@ HARDCOVER_USER_BOOKS_BY_STATUS = """
 }
 """
 
-SERIES_QUERY = """
+SEARCH_SERIES = """
 {
   series(where: {slug: {_eq: SLUG }}) {
     name
@@ -152,6 +105,191 @@ SERIES_QUERY = """
       taggings {
         tag {
           tag
+        }
+      }
+    }
+  }
+}
+"""
+
+FOLLOWED_PROMPTS = """
+{
+  me {
+    prompts {
+      followed_prompts {
+        prompt {
+          answers_count
+          books_count
+          created_at
+          description
+          question
+          prompt_books {
+            answers_count
+            book {
+              slug
+              title
+              rating
+              ratings_count
+              release_date
+              reviews_count
+              image {
+                url
+              }
+              description
+              book_series {
+                series {
+                  slug
+                  name
+                }
+              }
+              taggings {
+                tag {
+                  tag_category {
+                    id
+                    tags {
+                      tag
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
+SEARCH_PROMPT = """
+{
+  prompts(where: {slug: {_eq: SLUG }}) {
+    answers_count
+    books_count
+    created_at
+    description
+    question
+    prompt_books {
+      answers_count
+      book {
+        slug
+        title
+        rating
+        ratings_count
+        release_date
+        reviews_count
+        image {
+          url
+        }
+        description
+        book_series {
+          series {
+            slug
+            name
+          }
+        }
+        taggings {
+          tag {
+            tag_category {
+              id
+              tags {
+                tag
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
+FOLLOWED_LISTS = """
+{
+  me {
+    lists {
+      followed_lists {
+        list {
+          slug
+          name
+          books_count
+          description
+          likes_count
+          list_books {
+          position
+            book {
+              slug
+              title
+              release_date
+              rating
+              ratings_count
+              pages
+              reviews_count
+              description
+              state
+              users_read_count
+              created_at
+              image {
+                url
+              }
+              description
+              book_series {
+                series {
+                  slug
+                  name
+                }
+              }
+              taggings {
+                tag {
+                  tag
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+"""
+
+SEARCH_LISTS = """
+{
+  lists(where: {slug: {_eq: SLUG }}) {
+    slug
+    name
+    followers_count
+    description
+    created_at
+    books_count
+    list_books {
+      position
+      book {
+        slug
+        title
+        release_date
+        rating
+        ratings_count
+        pages
+        reviews_count
+        description
+        state
+        users_read_count
+        created_at
+        image {
+          url
+        }
+        description
+        book_series {
+          series {
+            slug
+            name
+          }
+        }
+        taggings {
+          tag {
+            tag
+          }
         }
       }
     }
