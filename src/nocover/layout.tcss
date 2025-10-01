@@ -1,0 +1,187 @@
+* {
+    background: #1f2837;
+}
+
+#app-title {
+    background: black 100%;
+}
+
+DetailsPanel {
+    max-width: 70%;
+    border: solid cyan;
+    padding: 1;
+    border-title-color: white;
+}
+
+Screen {
+    layout: horizontal;
+}
+
+Header {
+    height: 3;
+    width: 1fr;
+    border: solid grey;
+    dock: top;
+    background: #2e296b
+
+}
+
+Footer {
+    height: 3;
+    width: 1fr;
+    border: solid grey;
+    dock: bottom;
+    background: #2e296b;
+}
+
+MainContainer  {
+    max-width: 30%;
+    overflow-y: hidden;
+    border: solid cyan;
+    border-title-color: white;
+}
+
+Tab {
+    background: #1f2837;
+    color: white;
+}
+
+Tab.-active {
+    background: #6366f0;
+    text-style: bold;
+}
+
+Tabs {
+    background: #1f2837;
+    border-bottom: solid gray;
+}
+
+ListItem {
+    background: #1f2837;
+    color: white;
+}
+
+.detail-book {
+    border: round #6366f0;
+    border-title-color: white;
+    margin: 1;
+    padding: 1;
+    background: #1f2837;
+    height: auto;
+    width: 100%
+}
+
+#book_cover {
+    padding: 0;
+    margin: 0;
+    max-width: 20%
+}
+
+#book_details {
+    padding: 0 1;
+    margin: 0;
+    min-width: 20;
+    max-width: 75
+}
+
+#details_rows .detail-row {
+    height: auto;
+    padding: 0 1;
+    margin: 0
+}
+
+.detail-key {
+    text-style: bold
+}
+
+/* Normal single-line values */
+.detail-value {
+    min-height: 1;
+    max-height: 2;
+    overflow: hidden;
+    text-wrap: wrap;
+}
+
+/* Large multi-line values */
+.detail-value-big {
+    min-height: 5;
+    max-height: 20;
+    overflow-y: scroll;
+    text-wrap: wrap;
+}
+
+HelpModal {
+    align: center middle;
+    background: rgba(0, 0, 0, 0.7);  /* dim background */
+}
+
+SeriesAddModal {
+    align: center middle;
+    background: rgba(0, 0, 0, 0.7);  /* dim background */
+}
+
+
+
+#popup {
+    width: 60%;
+    max-width: 75%;
+    height: auto;
+    border: solid white;
+    padding: 2;
+    background: #1f2837;
+    color: white;
+    align: center middle;
+    border-title-align: center;
+}
+
+#popup-buttons {
+    align: center middle;
+    margin-top: 1;
+}
+
+.popup-text {
+    align: center middle;
+    max-width: 50;
+}
+
+.loading-row {
+    align-horizontal: center;
+    height: 100%;
+}
+
+#general-button {
+    height: 1
+}
+
+#button-bar {
+    height: 2;
+    padding: 0 2;
+    layout: horizontal;
+    align: center middle;
+}
+
+#button-bar Button {
+    width: 100%;
+    max-width: 30%;
+    min-height: 3;
+    margin: 0 1;
+    background: #443ca2;
+    color: white;
+    text-style: bold;
+    content-align: center top;
+}
+
+.detail-series {
+    border: round #6366f0;
+    height: auto;
+    border-title-color: white;
+    width: 85
+}
+
+.multi-line-box {
+    width: 70;
+}
+
+.multi-line-box-2 {
+    width: 60;
+}
