@@ -12,21 +12,17 @@ A TUI for your Hardcover experience, supporting offline business too.
 
 """
 
-def parse_args(argv = None):
+def parse_args(argv=None):
     parser = argparse.ArgumentParser(
-        prog = "nocover",
+        prog="nocover",
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description = textwrap.dedent(text = DESCRIPTION)
+        description=textwrap.dedent(text = DESCRIPTION)
     )
 
-    parser.add_argument(
-        "config",
-        type = str,
-        help = "",
-        default = "~/hcdb/.config"
-    )
+    parser.add_argument( "config", type=str, help="", default = "~/hcdb/.config")
 
     return parser.parse_args()
+
 
 def main():
     args = parse_args()

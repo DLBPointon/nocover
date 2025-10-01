@@ -13,16 +13,11 @@ class BookData:
             # if offline else
             get_remote_data(query=query, token=self.config.token, url=self.db_url)
         )
-        data                = get_book_data["me"][0]["user_books"]
+        data = get_book_data["me"][0]["user_books"]
 
         self.statuses: list[str] = self.get_statuses(data)
-
-
-        self.dict_by_status = self.dict_by_status(
-            data=data, status_list=self.statuses
-        )
-
-        self.structured_data    = [self.restructured_data(data = i) for i in data]
+        self.dict_by_status = self.dict_by_status(data=data, status_list=self.statuses)
+        self.structured_data = [self.restructured_data(data = i) for i in data]
 
     def restructured_data(self, data):
         cleaned = dict()
@@ -33,7 +28,7 @@ class BookData:
         return cleaned
 
 
-    def get_statuses(self, data) ->list[str]:
+    def get_statuses(self, data) -> list[str]:
         statuses = []
         for i in data:
             if i["user_book_status"]["slug"] not in statuses:
@@ -52,7 +47,7 @@ class BookData:
                     key: str = i["book"]["title"]
                     sorted_dict[status][key] = i["book"]
 
-        with open ("dict_test.json", 'w') as f:
+        with open ("dict_test.json", "w") as f:
             json.dump(sorted_dict, f)
 
         return sorted_dict
