@@ -9,7 +9,7 @@ from textual.screen import ModalScreen, Screen
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical, HorizontalScroll,VerticalScroll
 from textual.widgets import Label, TabbedContent, TabPane, ListItem, ListView
-from textual.widgets import Footer, Button, Input, LoadingIndicator, Static, Link
+from textual.widgets import Footer, Button, Input, Static, Link
 
 # Local App Imports
 from nocover.appinfo import VERSION, APP_NAME
