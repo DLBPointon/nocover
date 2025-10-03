@@ -115,41 +115,30 @@ SEARCH_SERIES = """
 FOLLOWED_PROMPTS = """
 {
   me {
-    prompts {
-      followed_prompts {
-        prompt {
+    followed_prompts {
+      prompt {
+        answers_count
+        books_count
+        created_at
+        description
+        question
+        prompt_books {
           answers_count
-          books_count
-          created_at
-          description
-          question
-          prompt_books {
-            answers_count
-            book {
-              slug
-              title
-              rating
-              ratings_count
-              release_date
-              reviews_count
-              image {
-                url
-              }
-              description
-              book_series {
-                series {
-                  slug
-                  name
-                }
-              }
-              taggings {
+          book {
+            slug
+            title
+            rating
+            ratings_count
+            release_date
+            reviews_count
+            description
+            taggings_aggregate {
+              nodes {
                 tag {
                   tag_category {
-                    id
-                    tags {
-                      tag
-                    }
+                    category
                   }
+                  tag
                 }
               }
             }
@@ -159,6 +148,7 @@ FOLLOWED_PROMPTS = """
     }
   }
 }
+
 """
 
 SEARCH_PROMPT = """

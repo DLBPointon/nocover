@@ -6,26 +6,20 @@ from textual.widgets import Input, Label, Button, Checkbox
 from textual.containers import Vertical, Horizontal
 from textual.app import ComposeResult
 
-from nocover.hardcover.raw_queries import SERIES_QUERY
+from nocover.hardcover.raw_queries import SEARCH_SERIES
 
-from nocover.error_page import ErrorModal
+from nocover.modals.add_modal import AddModal
+from nocover.modals.error_page import ErrorModal
+
 from nocover.config import Config
 
 from nocover.brl.book import Book
 from nocover.brl.generate_brl import generate_brl_file
 
-class SeriesAddModal(ModalScreen):
-    def __init__(self, config: Config, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.title: str             = "Add Series"
-        self.db_url: str            = config.db_url
-        self.config_token: str      = config.token
-        self.config_folder: str     = config.path
-        self.series_input: Input    = Input(
-            placeholder="Series to add locally (Use the slug!): space-marine-battles",
-            type="text",
-            classes="popup-text"
-        )
+class SeriesAddModal(AddModal):
+    def __init__(self, title: str, config: Config, *args, **kwargs):
+        super().__init__(title, config, *args, **kwargs)
+
         self.universe: Input        = Input(
             placeholder="Universe of series (optional): Warhammer",
             type="text",
@@ -40,8 +34,8 @@ class SeriesAddModal(ModalScreen):
 
     def compose(self) -> ComposeResult:
         with Vertical(id="popup"):
-            yield Label("So, you want to add a Series...", id="popup-title")
-            yield self.series_input
+            yield Label(f"So, you want to add a {self.title.title()}...", id="popup-title")
+            yield self.slug_input
             yield self.universe
             yield self.universe_position
 
@@ -59,7 +53,7 @@ class SeriesAddModal(ModalScreen):
         """
         Variant of the function found in the general_functions.py file
         """
-        new_query: str = SERIES_QUERY.replace("SLUG", f'"{self.series_input.value}"')
+        new_query: str = SEARCH_SERIES.replace("SLUG", f'"{self.slug_input.value}"')
 
         reqHeaders: dict[str, str] = {
             'Authorization': 'Bearer ' + self.config_token
@@ -83,7 +77,7 @@ class SeriesAddModal(ModalScreen):
             "name" :                data["name"],
             "author_name" :         data["author"]["name"],
             "author_personal" :     data["author"]["name_personal"],
-            "series_slug" :         self.series_input.value,
+            "series_slug" :         self.slug_input.value,
             "series_universe" :     "NA" if self.universe.value is None else self.universe.value,
             "series_universe_pos":  "NA" if self.universe_position.value is None else self.universe_position.value,
             "series_description" :  data["description"],
@@ -169,7 +163,7 @@ class SeriesAddModal(ModalScreen):
 
     def reformat_book_data(self, data):
         clean_book_list, ghosts, compilations = self.clean_book_data(data)
-        book_list = [ Book(book_dict=book) for book in clean_book_list ]
+        book_list = self.get_book_list(clean_book_list)
         return {
             "raw_book_count" :      len(data),
             "clean_book_count" :    len(book_list),
@@ -183,34 +177,18 @@ class SeriesAddModal(ModalScreen):
         }
 
 
-    def update_index_file(self, series_name, series_count, brl_file):
-        new_series = f"{series_name},{series_count},{brl_file}"
-
-        with open(self.config_folder + "/series_list.csv", "r") as series_list:
-            for line in series_list:
-                if line == new_series:
-                    self.app.push_screen(
-                        ErrorModal("Series already in Series List!")
-                    )
-
-        with open(self.config_folder + "/series_list.csv", "a") as series_list:
-            series_list.write(new_series)
-
-
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save":
-            series_data, book_data = self.validate_series(self.series_input.value)
+            series_data, book_data = self.validate_series(self.slug_input.value)
 
             if isinstance(series_data, bool) and isinstance(book_data, bool):
                 self.app.push_screen(
                     ErrorModal("Invalid series slug - no data returned from Hardcover")
                 )
 
-            series_path: str = self.config_folder + "/series_data/"
-            if not os.path.exists(series_path):
-                os.mkdir(series_path)
+            item_path = self.make_sure_item_dir_exists()
 
-            brl_location: str = series_path + self.series_input.value + ".brl"
+            brl_location: str = item_path + self.slug_input.value + ".brl"
             if not os.path.exists(brl_location):
                 reformatted_series_data: dict[str, str] = self.reformat_series_data(series_data)
 
@@ -239,7 +217,7 @@ class SeriesAddModal(ModalScreen):
                 self.update_index_file(
                     reformatted_series_data["name"],
                     reformatted_book_data["clean_book_count"],
-                    series_path + reformatted_series_data["series_slug"] + ".brl\n"
+                    item_path + reformatted_series_data["series_slug"] + ".brl\n"
                 )
 
                 self.dismiss("saved")

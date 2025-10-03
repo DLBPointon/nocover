@@ -20,6 +20,8 @@ from nocover.list_items import BookListItem, SeriesListItem, ListListItem, Promp
 from nocover.modals.help_page import HelpModal
 from nocover.modals.error_page import ErrorModal
 from nocover.modals.series_add_modal import SeriesAddModal
+from nocover.modals.list_add_modal import ListAddModal
+from nocover.modals.prompt_add_modal import PromptAddModal
 
 # Local App Hardcover Imports
 from nocover.hardcover.raw_queries import HARDCOVER_PROFILE_QUERY
@@ -516,7 +518,7 @@ class MainContainer(TabbedContent):
         if event.button.id == "refresh_active":
             self.refresh_series_list()
         elif event.button.id == "add_series":
-            self.app.push_screen(SeriesAddModal(self.config_data))
+            self.app.push_screen(SeriesAddModal("series", self.config_data))
         elif event.button.id == "remove_series":
             self.remove_series()
 
@@ -594,6 +596,21 @@ class NCApp(App):
             description="Add Series"
         ),
         Binding(
+            key="p",
+            action="promptAdd",
+            description="Add Prompt"
+        ),
+        Binding(
+            key="l",
+            action="listAdd",
+            description="Add List"
+        ),
+        Binding(
+            key="H",
+            action="hardRefesh",
+            description="Hard Refresh Everything!"
+        ),
+        Binding(
             key="h", action="help", description="Help Panel"
         )
     ]
@@ -604,7 +621,15 @@ class NCApp(App):
 
     def action_seriesAdd(self):
         """Show modal for adding a series to local tracking"""
-        self.push_screen(SeriesAddModal(self.config_data))
+        self.push_screen(SeriesAddModal(title="series", config=self.config_data))
+
+    def action_listAdd(self):
+        """Show modal for adding a list to local tracking"""
+        self.push_screen(ListAddModal(title="list", config=self.config_data))
+
+    def action_promptAdd(self):
+        """Show modal for adding a prompt to local tracking"""
+        self.push_screen(PromptAddModal(title="prompt", config=self.config_data))
 
     def action_read(self):
         """API move book from want-to-read to read"""
@@ -615,6 +640,7 @@ class NCApp(App):
         profile_data = Profile(
             HARDCOVER_PROFILE_QUERY, self.config_data, offline
         )
+
         book_data = UserBookData(
             HARDCOVER_USER_BOOKS_BY_STATUS, self.config_data, offline
         )
