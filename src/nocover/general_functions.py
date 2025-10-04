@@ -6,7 +6,7 @@ def get_remote_data(query: str, token: str, url: str):
     """
     Get data from Hardcover API
     """
-    reqHeaders = {'Authorization': 'Bearer ' + token}
+    reqHeaders = {'Authorization': token}
 
     response = requests.post(url=url, headers=reqHeaders, json={"query": query})
 

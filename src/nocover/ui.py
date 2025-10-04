@@ -48,15 +48,11 @@ class MissingConfigOption(ModalScreen[None]):
     def __init__(
         self,
         config_path: str,
-        profile_data: Profile,
-        book_data: UserBookData,
         config_data: Config
     ) -> None:
         super().__init__()
         self.config_path: str           = config_path
         self.config_data: Config        = config_data
-        self.profile_data: Profile      = profile_data
-        self.book_data: UserBookData    = book_data
         self.config_input: Input        = Input(
             placeholder = "Hardcover Token"
         )
@@ -83,10 +79,7 @@ class MissingConfigOption(ModalScreen[None]):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save":
 
-            os.makedirs(
-                os.path.dirname(self.config_path), exist_ok=True
-            )
-            with open(self.config_path, "w") as f:
+            with open(self.config_path + "/.config", "w") as f:
                 data: dict[str, str] = {
                     "HARDCOVER_API_TOKEN"   : self.config_input.value,
                     "EMAIL"                 : self.email_input.value
@@ -97,7 +90,6 @@ class MissingConfigOption(ModalScreen[None]):
                 json.dump(
                     obj= data,
                     fp=f,
-                    encoding='utf-8',
                     sort_keys = True,
                     indent=4 # HARD MUST, NO 2 SPACE INDENTS
                 )
@@ -105,9 +97,7 @@ class MissingConfigOption(ModalScreen[None]):
             self.app.pop_screen()
             self.app.push_screen(
                 NCScreen(
-                    self.profile_data,
-                    self.book_data,
-                    self.config_data
+                    Config(self.config_path)
                 )
             )  # go to main screen
 
@@ -351,19 +341,19 @@ class MainContainer(TabbedContent):
 
 
     @staticmethod
-    def createListListItem():
+    def createListListItem(self):
         return [
             ListListItem(
                  line
-            ) for line in open("./hi/lists.csv")
+            ) for line in open(f"{self.config_data.path}/list_list.csv")
         ]
 
     @staticmethod
-    def createPromptListItem():
+    def createPromptListItem(self):
         return [
             PromptListItem(
                 line
-            ) for line in open("./hi/prompt_list.csv")
+            ) for line in open(f"{self.config_data.path}/prompt_list.csv")
         ]
 
 
@@ -421,20 +411,20 @@ class MainContainer(TabbedContent):
                             series_name=line.split(',')[0],
                             series_count=str(line.split(',')[1]),
                             series_brl=line.split(',')[2]
-                        ) for line in open("./hi/series_list.csv")
+                        ) for line in open(f"{self.config_data.path}/series_list.csv")
                     ],
                     id="series_list"
                 )
 
             with TabPane(title="Lists", id="list_list"):
                 yield ListView(
-          		    *self.createListListItem(),
+          		    *self.createListListItem(self),
           		    id = "ListList"
           		)
 
             with TabPane(title="Prompts", id="list_prompt"):
                 yield ListView(
-                    *self.createPromptListItem(),
+                    *self.createPromptListItem(self),
                     id = "SeriesList"
                 )
 
@@ -454,7 +444,7 @@ class MainContainer(TabbedContent):
             series_list = self.query_one("#series_list", ListView)
             series_list.clear()
 
-            with open("./hi/series_list.csv") as f:
+            with open(f"{self.config_data.path}/series_list.csv") as f:
                 for line in f:
                     if not line == "\n":
                         name, count, brl = line.strip().split(",")
@@ -487,12 +477,12 @@ class MainContainer(TabbedContent):
         item.remove()
 
         # Remove from CSV
-        csv_file = "./hi/series_list.csv"
+        csv_file = f"{self.config_path}/series_list.csv"
         with open(csv_file, "r") as f:
             lines = f.readlines()
 
         # make tmp file
-        with open(".series_list.csv", "w") as n:
+        with open(f"{self.config_path}/.series_list.csv", "w") as n:
             for line in lines:
                 if not line == f"{series_name},{series_count},{series_brl}":
                     n.write(line)
@@ -525,14 +515,20 @@ class MainContainer(TabbedContent):
 
 class NCScreen(Screen):
     def __init__(self,
-        profile_data: Profile,
-        book_data: UserBookData,
         config_data: Config
     ):
         super().__init__()
-        self.profile_data = profile_data
-        self.book_data = book_data
+        offline = False
+        
         self.config_data = config_data
+        self.profile_data = Profile(
+            HARDCOVER_PROFILE_QUERY, self.config_data, offline
+        )
+        self.book_data = UserBookData(
+            HARDCOVER_USER_BOOKS_BY_STATUS, self.config_data, offline
+        )
+        
+
 
     CSS_PATH = "layout.tcss"
 
@@ -580,7 +576,6 @@ class NCApp(App):
     def __init__(self, config_path: str, **kwargs):
         super().__init__(**kwargs)
         self.config_path = config_path
-        self.config_file = self.config_path + "/configs.json"
         self.config_data = Config(self.config_path)
 
     BINDINGS = [
@@ -636,29 +631,17 @@ class NCApp(App):
         pass
 
     def on_mount(self) -> None:
-        offline = False
-        profile_data = Profile(
-            HARDCOVER_PROFILE_QUERY, self.config_data, offline
-        )
 
-        book_data = UserBookData(
-            HARDCOVER_USER_BOOKS_BY_STATUS, self.config_data, offline
-        )
-
-        if not os.path.exists(self.config_path):
+        if not self.config_data.token and not self.config_data.email:
             self.push_screen(
                 MissingConfigOption(
                     config_path = self.config_path,
-                    config_data = self.config_data,
-                    profile_data = profile_data,
-                    book_data = book_data
+                    config_data = self.config_data
                 )
             )
         else:
             self.push_screen(
                 NCScreen(
-                    profile_data,
-                    book_data,
                     config_data = self.config_data
                 )
             )

@@ -56,7 +56,7 @@ class SeriesAddModal(AddModal):
         new_query: str = SEARCH_SERIES.replace("SLUG", f'"{self.slug_input.value}"')
 
         reqHeaders: dict[str, str] = {
-            'Authorization': 'Bearer ' + self.config_token
+            'Authorization': self.config_token
         }
 
         response = requests.post(

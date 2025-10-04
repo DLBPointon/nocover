@@ -44,7 +44,7 @@ class AddModal(ModalScreen):
         new_query: str = query.replace("SLUG", f'"{self.slug_input.value}"')
 
         reqHeaders: dict[str, str] = {
-            'Authorization': 'Bearer ' + self.config_token
+            'Authorization': self.config_token
         }
 
         response = requests.post(

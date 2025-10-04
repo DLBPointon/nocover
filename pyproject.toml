@@ -5,7 +5,10 @@ description = "A TUI application to supplement Hardcover"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "pathlib>=1.0.1",
     "requests>=2.32.5",
+    "textual>=6.2.1",
+    "xmltodict>=1.0.2",
 ]
 
 [project.scripts]

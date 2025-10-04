@@ -29,7 +29,7 @@ class PromptAddModal(AddModal):
         elif isinstance(api_data, dict):
             #header, book_list = self.clean_data(api_data)
             with open("testing.json", "w") as out:
-                #json.dump(api_data["me"][0]["followed_prompts"],out)
+                json.dump(api_data["me"][0]["followed_prompts"],out)
 
         else:
             ErrorModal(
