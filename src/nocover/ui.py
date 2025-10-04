@@ -274,10 +274,13 @@ class DetailsPanel(Static):
         max_key_len: int = max(len(k) for k in data.keys())
 
         # get list of keys in dict, and re-order so description is last
+        # ugly i know
         key_list = list(data.keys())
         for i in ["description", "slug"]:
-            key_list.remove(i)
-        key_list.append("description")
+            if i in key_list:
+                key_list.remove(i)
+                if i == "description":
+                    key_list.append("description")
 
         for key in key_list:
         # for key, value in data.items():
@@ -519,7 +522,7 @@ class NCScreen(Screen):
     ):
         super().__init__()
         offline = False
-        
+
         self.config_data = config_data
         self.profile_data = Profile(
             HARDCOVER_PROFILE_QUERY, self.config_data, offline
@@ -527,7 +530,7 @@ class NCScreen(Screen):
         self.book_data = UserBookData(
             HARDCOVER_USER_BOOKS_BY_STATUS, self.config_data, offline
         )
-        
+
 
 
     CSS_PATH = "layout.tcss"
