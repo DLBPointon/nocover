@@ -198,42 +198,34 @@ FOLLOWED_LISTS = """
 {
   me {
     lists {
-      followed_lists {
-        list {
+      slug
+      list_books {
+        position
+        book {
           slug
-          name
-          books_count
+          title
+          release_date
+          rating
+          ratings_count
+          pages
+          reviews_count
           description
-          likes_count
-          list_books {
-          position
-            book {
+          state
+          users_read_count
+          created_at
+          image {
+            url
+          }
+          description
+          book_series {
+            series {
               slug
-              title
-              release_date
-              rating
-              ratings_count
-              pages
-              reviews_count
-              description
-              state
-              users_read_count
-              created_at
-              image {
-                url
-              }
-              description
-              book_series {
-                series {
-                  slug
-                  name
-                }
-              }
-              taggings {
-                tag {
-                  tag
-                }
-              }
+              name
+            }
+          }
+          taggings {
+            tag {
+              tag
             }
           }
         }

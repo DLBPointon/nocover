@@ -1,6 +1,9 @@
 # General Package Imports
 import os
 import json
+from textual import work
+import asyncio
+
 
 # Textual Package Import
 from textual.app import App, ComposeResult
@@ -28,7 +31,7 @@ from nocover.hardcover.raw_queries import HARDCOVER_PROFILE_QUERY
 from nocover.hardcover.raw_queries import HARDCOVER_USER_BOOKS_BY_STATUS
 from nocover.hardcover.get_profile import Profile
 from nocover.hardcover.get_books import BookData as UserBookData
-from nocover.hardcover.get_series import SeriesData
+from nocover.brl.read_series_brl import SeriesBrlData
 
 DEFAULT_BOOK_COVER = """
 +-------------+
@@ -143,60 +146,38 @@ class DetailsPanel(Static):
             yield VerticalScroll(id="details_rows")
 
 
-    def update_series_details(self, data: SeriesData) -> None:
-        """Update panel with ListItem per book in SeriesData."""
+    def update_series_details(self, data: SeriesBrlData) -> None:
+        """Update panel with ListItem per book in SeriesBrlData."""
         container = self.query_one("#details_rows", VerticalScroll)
         container.remove_children()
 
         # --- Series Card ---
         series_block = Vertical(classes="detail-series")
 
-        series_name = data.series_data["Series"].get(
-            "@Name", "Unknown Series"
-        )
         series_block.border_title = (
-            f"Series overview: [b][u]{series_name}[/u][/b]"
+            f"Series overview: [b][u]{data.series_name}[/u][/b]"
         )
 
         container.mount(series_block)
 
-        universe_tag = data.series_data["Series"].get(
-            "Universe", "Series is a standalone!"
-        )
-
-        universe_tag = (
-            f"Series belongs to the {universe_tag["@Name"]} Universe {
-                (
-                    ""
-                    if universe_tag["@Position"] is None
-                    else f"(Position: {universe_tag["@Position"]})"
-                )
-            }"
-            if universe_tag != "Series is a standalone!"
-            else universe_tag
-        )
-
         series_block.mount(Horizontal(*[
-            Label(universe_tag)], classes="detail-row")
+            Label(data.universe)], classes="detail-row")
         )
 
-        database_info = data.series_data["Series"]["Database"]
         series_block.mount(Horizontal(*[
             Label("Database: ", classes="detail-key"),
             Link(
-                str(f"{database_info["@Name"]}/{database_info["@Item"]}"),
-                url=f"https://hardcover.app/series/{database_info["@Item"]}",
-                tooltip=f"Head to Hardcover page for {series_name}"
+                str(f"{data.database_info["@Name"]}/{data.database_info["@Item"]}"),
+                url=f"https://hardcover.app/series/{data.database_info["@Item"]}",
+                tooltip=f"Head to Hardcover page for {data.series_name}"
             )
         ], classes="detail-row"))
 
-        series_description = data.series_data["Series"]["Description"]
-        series_description = str(series_description)
         series_block.mount(
             Horizontal(
                 *[
                     Label("Description: ", classes="detail-key"),
-                    Label(series_description, classes="multi-line-box")
+                    Label(data.series_description, classes="multi-line-box")
                 ],
                 classes="detail-row"
             )
@@ -525,10 +506,16 @@ class NCScreen(Screen):
 
         self.config_data = config_data
         self.profile_data = Profile(
-            HARDCOVER_PROFILE_QUERY, self.config_data, offline
+            query=HARDCOVER_PROFILE_QUERY,
+            api_path="profile",
+            config_path=self.config_data,
+            offline=offline
         )
         self.book_data = UserBookData(
-            HARDCOVER_USER_BOOKS_BY_STATUS, self.config_data, offline
+            query=HARDCOVER_USER_BOOKS_BY_STATUS,
+            api_path="user_books",
+            config_path=self.config_data,
+            offline=offline
         )
 
 
@@ -565,7 +552,7 @@ class NCScreen(Screen):
             panel.update_details(event.item.book_data)
 
         if isinstance(event.item, SeriesListItem):
-            panel.update_series_details(SeriesData(event.item.series_brl))
+            panel.update_series_details(SeriesBrlData(event.item.series_brl))
 
         if (
             isinstance(event.item, ProfilePublicListItem)
@@ -633,7 +620,21 @@ class NCApp(App):
         """API move book from want-to-read to read"""
         pass
 
+    async def startup(self):
+        await asyncio.sleep(2)  # simulate loading work
+        await self.pop_screen()  # remove loading screen
+        await self.push_screen(
+            NCScreen(
+                config_data = self.config_data
+        ))
+
     def on_mount(self) -> None:
+
+        from nocover.loading_screen import LoadingScreen
+        self.push_screen(LoadingScreen())
+        self.run_worker(self.startup())
+
+
 
         if not self.config_data.token and not self.config_data.email:
             self.push_screen(
