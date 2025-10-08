@@ -1,5 +1,6 @@
 # General Package Imports
 import os
+from pathlib import Path
 import json
 from textual import work
 import asyncio
@@ -9,7 +10,7 @@ import asyncio
 from textual.app import App, ComposeResult
 from textual.screen import ModalScreen, Screen
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical, HorizontalScroll,VerticalScroll
+from textual.containers import Horizontal, Vertical, HorizontalScroll,VerticalScroll, Container
 from textual.widgets import Label, TabbedContent, TabPane, ListView
 from textual.widgets import Footer, Button, Input, Static, Link
 
@@ -17,6 +18,7 @@ from textual.widgets import Footer, Button, Input, Static, Link
 from nocover.appinfo import VERSION, APP_NAME
 from nocover.config import Config
 from nocover.list_items import BookListItem, SeriesListItem, ListListItem, PromptListItem, ProfilePublicListItem, ProfileBooksListItem, ProfilePersonalListItem
+from nocover.loading_screen import LoadingScreen
 
 # Local App Modal Imports
 # from nocover.modals.start_up import StartUp
@@ -498,52 +500,70 @@ class MainContainer(TabbedContent):
 
 
 class NCScreen(Screen):
-    def __init__(self,
-        config_data: Config
-    ):
+    """Main screen with internal full-screen loading overlay."""
+    CSS_PATH = "layout.tcss"
+
+    def __init__(self, config_data):
         super().__init__()
+        self.config_data = config_data
+        self.profile_data = None
+        self.book_data = None
+
+    def compose(self) -> ComposeResult:
+        yield Container(id="content")  # placeholder for main content
+        yield LoadingScreen(id="loading_overlay")
+
+    async def on_mount(self):
+        """Start data preparation when screen mounts."""
+        self.run_worker(self.prepare_data())
+
+    async def prepare_data(self):
+        """Load data in stages and update status."""
+        overlay = self.query_one("#loading_overlay", LoadingScreen)
         offline = False
 
-        self.config_data = config_data
+        overlay.update_status("Loading profile data...")
+        await asyncio.sleep(0.5)
         self.profile_data = Profile(
             query=HARDCOVER_PROFILE_QUERY,
             api_path="profile",
             config_path=self.config_data,
-            offline=offline
+            offline=offline,
         )
+
+        overlay.update_status("Loading book data...")
+        await asyncio.sleep(0.5)
         self.book_data = UserBookData(
             query=HARDCOVER_USER_BOOKS_BY_STATUS,
             api_path="user_books",
             config_path=self.config_data,
-            offline=offline
+            offline=offline,
         )
 
+        overlay.update_status("Getting it Done Done Done...")
+        await self.show_main_content()
 
+    async def show_main_content(self):
+        """Fade out loading overlay and mount main UI."""
+        overlay = self.query_one("#loading_overlay")
+        overlay.styles.animate("opacity", 0.0, duration=1.0)
+        overlay.set_timer(1.0, overlay.remove)
 
-    CSS_PATH = "layout.tcss"
-
-    def compose(self) -> ComposeResult:
-        yield Header(
-            id="Header",
-            classes="header",
-            user=self.profile_data.name
-        )
-
-        with HorizontalScroll():
-                yield MainContainer(
+        content = self.query_one("#content")
+        await content.mount_all([
+            Header(id="Header", classes="header", user=self.profile_data.name),
+            HorizontalScroll(
+                MainContainer(
                     id="book_list",
                     classes="book_list",
                     profile_data=self.profile_data,
                     book_data=self.book_data,
-                    config_data=self.config_data
-                )
-
-                yield DetailsPanel(
-                    id="book_panel"
-                )
-
-        yield Footer()
-
+                    config_data=self.config_data,
+                ),
+                DetailsPanel(id="book_panel"),
+            ),
+            Footer(),
+        ])
 
     async def on_list_view_selected(self, event: ListView.Selected) -> None:
         panel = self.query_one("#book_panel", DetailsPanel)
@@ -620,22 +640,8 @@ class NCApp(App):
         """API move book from want-to-read to read"""
         pass
 
-    async def startup(self):
-        await asyncio.sleep(2)  # simulate loading work
-        await self.pop_screen()  # remove loading screen
-        await self.push_screen(
-            NCScreen(
-                config_data = self.config_data
-        ))
 
     def on_mount(self) -> None:
-
-        from nocover.loading_screen import LoadingScreen
-        self.push_screen(LoadingScreen())
-        self.run_worker(self.startup())
-
-
-
         if not self.config_data.token and not self.config_data.email:
             self.push_screen(
                 MissingConfigOption(

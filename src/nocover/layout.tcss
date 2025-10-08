@@ -17,6 +17,25 @@ Screen {
     layout: horizontal;
 }
 
+LoadingScreen {
+    layer: overlay;
+    align: center middle;
+    background: $surface;
+    opacity: 100%;
+    transition: opacity 400ms;
+}
+
+#ascii_logo {
+    text-style: bold;
+    color: $accent;
+    content-align: center middle;
+}
+
+#status_text {
+    text-style: bold;
+    content-align: center middle;
+}
+
 Header {
     height: 3;
     width: 1fr;
