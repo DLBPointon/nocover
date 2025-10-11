@@ -1,11 +1,13 @@
-from textual.app import App, ComposeResult
-from textual.containers import Container, HorizontalScroll
-from textual.screen import Screen
+from textual.app import ComposeResult
+from textual.containers import Container
 from textual.widgets import Static
 
 class LoadingScreen(Container):
-    """Full-screen overlay with text-only loading status."""
+    """
+    Full-screen overlay with text-only loading status.
+    """
 
+    # Generated on https://patorjk.com/software/taag/
     ASCII_LOGO = r"""
     _   _       _____
    | \ | |     /  __ \

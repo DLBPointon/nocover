@@ -199,6 +199,12 @@ FOLLOWED_LISTS = """
   me {
     lists {
       slug
+      books_count
+      description
+      likes_count
+      followers_count
+      name
+      updated_at
       list_books {
         position
         book {

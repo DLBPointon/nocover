@@ -14,25 +14,27 @@ from textual.containers import Horizontal, Vertical, HorizontalScroll,VerticalSc
 from textual.widgets import Label, TabbedContent, TabPane, ListView
 from textual.widgets import Footer, Button, Input, Static, Link
 
-# Local App Imports
+# Local App Importsfrom textual.widgets import Label
 from nocover.appinfo import VERSION, APP_NAME
 from nocover.config import Config
 from nocover.list_items import BookListItem, SeriesListItem, ListListItem, PromptListItem, ProfilePublicListItem, ProfileBooksListItem, ProfilePersonalListItem
 from nocover.loading_screen import LoadingScreen
+from nocover.general_functions import json_dump
 
 # Local App Modal Imports
-# from nocover.modals.start_up import StartUp
+from nocover.general_classes import NCHeader
 from nocover.modals.help_page import HelpModal
 from nocover.modals.error_page import ErrorModal
 from nocover.modals.series_add_modal import SeriesAddModal
 from nocover.modals.list_add_modal import ListAddModal
 from nocover.modals.prompt_add_modal import PromptAddModal
+from nocover.modals.read_modal import ReadModal
 
 # Local App Hardcover Imports
-from nocover.hardcover.raw_queries import HARDCOVER_PROFILE_QUERY
-from nocover.hardcover.raw_queries import HARDCOVER_USER_BOOKS_BY_STATUS
+from nocover.hardcover.raw_queries import HARDCOVER_PROFILE_QUERY, HARDCOVER_USER_BOOKS_BY_STATUS, FOLLOWED_LISTS
 from nocover.hardcover.get_profile import Profile
 from nocover.hardcover.get_books import BookData as UserBookData
+from nocover.hardcover.get_lists import ListData as UserListData
 from nocover.brl.read_series_brl import SeriesBrlData
 
 DEFAULT_BOOK_COVER = """
@@ -45,7 +47,6 @@ DEFAULT_BOOK_COVER = """
 """
 
 
-# TODO: Refactor into StartUp
 class MissingConfigOption(ModalScreen[None]):
     """
 
@@ -89,15 +90,7 @@ class MissingConfigOption(ModalScreen[None]):
                     "HARDCOVER_API_TOKEN"   : self.config_input.value,
                     "EMAIL"                 : self.email_input.value
                 }
-
-                # fp is the File to Process... probably not the official
-                # meaning but it works
-                json.dump(
-                    obj= data,
-                    fp=f,
-                    sort_keys = True,
-                    indent=4 # HARD MUST, NO 2 SPACE INDENTS
-                )
+                json_dump(data, f)
 
             self.app.pop_screen()
             self.app.push_screen(
@@ -108,20 +101,6 @@ class MissingConfigOption(ModalScreen[None]):
 
         elif event.button.id == "cancel":
             self.app.exit("User cancelled config setup.")
-
-
-class Header(Horizontal):
-    def __init__(self, user, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.user = user
-        self.title      = "Header Application"
-        self.sub_title  = "With title and sub-title"
-
-    def compose(self) -> ComposeResult:
-        yield Label(
-            f"Welcome to [b]{APP_NAME}[/] ([b]v{VERSION}[/]) {self.user}!",
-            id="app-title"
-        )
 
 
 class DetailsPanel(Static):
@@ -237,6 +216,58 @@ class DetailsPanel(Static):
                     book_block.mount(row)
 
 
+    def update_list_details(self, list_data: dict, book_data: dict) -> None:
+        container = self.query_one("#details_rows", VerticalScroll)
+        container.remove_children()
+
+        # --- Series Card ---
+        series_block = Vertical(classes="detail-series")
+
+        series_block.border_title = (
+            f"List overview: [b][u]{list_data["name"]}[/u][/b]"
+        )
+
+        container.mount(series_block)
+
+        series_block.mount(Horizontal(*[
+            Label("Database: ", classes="detail-key"),
+            Link(
+                str(f"harcover/{list_data["slug"]}"),
+                url=f"https://hardcover.app/list/{list_data["slug"]}",
+                tooltip=f"Head to Hardcover page for {list_data["name"]}"
+            )
+        ], classes="detail-row"))
+
+        series_block.mount(
+            Horizontal(
+                *[
+                    Label("Description: ", classes="detail-key"),
+                    Label(list_data["description"], classes="multi-line-box")
+                ],
+                classes="detail-row"
+            )
+        )
+
+        series_block.mount(
+            Horizontal(
+                *[
+                    Label("Follower Count: ", classes="detail-key"),
+                    Label(str(list_data["follower_count"]), classes="multi-line-box")
+                ],
+                classes="detail-row"
+            )
+        )
+
+        series_block.mount(
+            Horizontal(
+                *[
+                    Label("Like Count: ", classes="detail-key"),
+                    Label(str(list_data["like_count"]), classes="multi-line-box")
+                ],
+                classes="detail-row"
+            )
+        )
+
 
     def update_details(self, data: dict):
         """
@@ -315,24 +346,26 @@ class MainContainer(TabbedContent):
         profile_data: Profile,
         book_data: UserBookData,
         config_data: Config,
+        list_data: UserListData,
         *args,
         **kwargs
     ):
         super().__init__(*args, **kwargs)
         self.profile_data = profile_data
         self.book_data = book_data
+        self.list_data = list_data
         self.border_title = "Data Panel"
         self.config_data = config_data
         self.book_by_Status = book_data.dict_by_status
 
 
-    @staticmethod
-    def createListListItem(self):
-        return [
-            ListListItem(
-                 line
-            ) for line in open(f"{self.config_data.path}/list_list.csv")
-        ]
+    # @staticmethod
+    # def createListListItem(self):
+    #     return [
+    #         ListListItem(
+    #              line
+    #         ) for line in open(f"{self.config_data.path}/list_list.csv")
+    #     ]
 
     @staticmethod
     def createPromptListItem(self):
@@ -403,10 +436,29 @@ class MainContainer(TabbedContent):
                 )
 
             with TabPane(title="Lists", id="list_list"):
-                yield ListView(
-          		    *self.createListListItem(self),
-          		    id = "ListList"
-          		)
+                with TabbedContent(initial="status-list-followed"):
+                    with TabPane(
+                        title="Followed lists", id=f"status-list-followed"
+                    ):
+                        # This one would be the auto list_data tab
+                        yield ListView(
+                            *[
+                                ListListItem(i, self.list_data.lists[i]["list_information"]["name"], self.list_data.lists[i])
+                                for i in self.list_data.lists
+                            ]
+                        )
+                    with TabPane(
+                        title="Manually Followed", id=f"status-list-manual-followed"
+                    ):
+                        with open("listlist2.txt", 'w') as file:
+                            json_dump(self.list_data.lists, file)
+
+                        yield ListView(
+                            *[
+                                ListListItem(i, self.list_data.lists[i]["list_information"]["name"], self.list_data.lists[i])
+                                for i in self.list_data.lists
+                            ]
+                        )
 
             with TabPane(title="Prompts", id="list_prompt"):
                 yield ListView(
@@ -523,7 +575,6 @@ class NCScreen(Screen):
         offline = False
 
         overlay.update_status("Loading profile data...")
-        await asyncio.sleep(0.5)
         self.profile_data = Profile(
             query=HARDCOVER_PROFILE_QUERY,
             api_path="profile",
@@ -532,12 +583,19 @@ class NCScreen(Screen):
         )
 
         overlay.update_status("Loading book data...")
-        await asyncio.sleep(0.5)
         self.book_data = UserBookData(
             query=HARDCOVER_USER_BOOKS_BY_STATUS,
             api_path="user_books",
             config_path=self.config_data,
             offline=offline,
+        )
+
+        overlay.update_status("Loading saved list data...")
+        self.list_data = UserListData(
+            query=FOLLOWED_LISTS,
+            api_path="lists",
+            config_path=self.config_data,
+            offline=offline
         )
 
         overlay.update_status("Getting it Done Done Done...")
@@ -551,13 +609,18 @@ class NCScreen(Screen):
 
         content = self.query_one("#content")
         await content.mount_all([
-            Header(id="Header", classes="header", user=self.profile_data.name),
+            NCHeader(
+                id="Header",
+                classes="header",
+                user=self.profile_data.name
+            ),
             HorizontalScroll(
                 MainContainer(
                     id="book_list",
                     classes="book_list",
                     profile_data=self.profile_data,
                     book_data=self.book_data,
+                    list_data=self.list_data,
                     config_data=self.config_data,
                 ),
                 DetailsPanel(id="book_panel"),
@@ -570,6 +633,9 @@ class NCScreen(Screen):
 
         if isinstance(event.item, BookListItem):
             panel.update_details(event.item.book_data)
+
+        if isinstance(event.item, ListListItem):
+            panel.update_list_details(event.item.list_data, event.item.book_data)
 
         if isinstance(event.item, SeriesListItem):
             panel.update_series_details(SeriesBrlData(event.item.series_brl))
@@ -638,7 +704,7 @@ class NCApp(App):
 
     def action_read(self):
         """API move book from want-to-read to read"""
-        pass
+        self.push_screen(ReadModal())
 
 
     def on_mount(self) -> None:

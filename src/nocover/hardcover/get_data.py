@@ -25,7 +25,7 @@ class GetData:
         self.data = ( get_data["me"][0] if api_path == "profile" else get_data["me"][0][api_path] )
 
 
-    def get_list_slugs(self, data):
+    def get_list_slugs(self):
         """
         Get the top level slug from the data
         We can think of these as series names so that data such as {"list_1":["book_1", "book_2"]}

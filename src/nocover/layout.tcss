@@ -36,7 +36,7 @@ LoadingScreen {
     content-align: center middle;
 }
 
-Header {
+NCHeader {
     height: 3;
     width: 1fr;
     border: solid grey;

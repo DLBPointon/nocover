@@ -9,13 +9,19 @@ class Config:
         self.token: str             = self.get_item(config_data, 'HARDCOVER_API_TOKEN')
         self.db_url: str            = "https://api.hardcover.app/v1/graphql"
 
-    
+
     def get_item(self, config_dict, config_key):
-        return config_dict[config_key] if isinstance(config_dict, dict) and len(config_dict.values()) > 0 else False
+        return (
+            config_dict[config_key]
+            if isinstance(config_dict, dict) and len(config_dict.values()) > 0
+            else False
+        )
 
 
     def check_files(self):
-        list_files = ["/series_list.csv", "/list_list.csv", "/prompt_list.csv"]
+        list_files = [
+            "/series_list.csv", "/list_list.csv", "/prompt_list.csv"
+        ]
         for i in list_files:
             full_path = self.path + i
             if not Path(self.path + i).exists():
@@ -33,7 +39,7 @@ class Config:
             return False
 
 
-    def read_config(self, full_path) -> dict[str, str]:
+    def read_config(self, full_path):
         try:
             with open(full_path) as config_json:
                 return json.load(fp=config_json)

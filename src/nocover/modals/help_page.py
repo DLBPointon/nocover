@@ -1,6 +1,6 @@
 from textual.screen import ModalScreen
 from textual.widgets import Static, Button
-from textual.containers import Vertical, Horizontal
+from textual.containers import VerticalScroll, Horizontal
 
 class HelpModal(ModalScreen):
     """A popup screen with help / instructions."""
@@ -9,7 +9,7 @@ class HelpModal(ModalScreen):
         self.title = "Help Screen"
 
     def compose(self):
-        with Vertical(id="popup"):
+        with VerticalScroll(id="popup"):
             yield Static("[b]Help & Shortcuts[/b]", id="popup-title")
 
             yield Static(
