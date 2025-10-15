@@ -19,7 +19,7 @@ from nocover.appinfo import VERSION, APP_NAME
 from nocover.config import Config
 from nocover.list_items import BookListItem, SeriesListItem, ListListItem, PromptListItem, ProfilePublicListItem, ProfileBooksListItem, ProfilePersonalListItem
 from nocover.loading_screen import LoadingScreen
-from nocover.general_functions import json_dump
+from nocover.general_functions import json_dump, max_key_len
 
 # Local App Modal Imports
 from nocover.general_classes import NCHeader
@@ -81,9 +81,11 @@ class MissingConfigOption(ModalScreen[None]):
                 yield Button("Save", id="save", variant="success")
                 yield Button("Cancel", id="cancel", variant="error")
 
-    # TODO: NEED TO ADD VALIDATION OF INPUT
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save":
+
+            # validated_input = self.validate_config_input()
 
             with open(self.config_path + "/.config", "w") as f:
                 data: dict[str, str] = {
@@ -119,12 +121,26 @@ class DetailsPanel(Static):
     def compose(self) -> ComposeResult:
         with Horizontal(id="BookBox"):
             # Left containter is the ASCII cover (static)
-            yield Static(
-                content=DEFAULT_BOOK_COVER, id="book_cover", markup=False
-            )
+            # yield Static(
+            #     content=DEFAULT_BOOK_COVER, id="book_cover", markup=False
+            # )
 
             # Right container is the details container we can fill dynamically
-            yield VerticalScroll(id="details_rows")
+            # Here it has a static placeholder which i think looks cool af
+            # generated at:
+            # https://patorjk.com/software/taag/#p=display&f=Alligator2&t=NC&x=none&v=4&h=4&w=80&we=false
+            yield VerticalScroll(
+                Static(content = """
+                    ::::    :::  ::::::::
+                    :+:+:   :+: :+:    :+:
+                    :+:+:+  +:+ +:+
+                    +#+ +:+ +#+ +#+
+                    +#+  +#+#+# +#+
+                    #+#   #+#+# #+#    #+#
+                    ###    ####  ########
+                    """),
+                id="details_rows"
+            )
 
 
     def update_series_details(self, data: SeriesBrlData) -> None:
@@ -158,7 +174,7 @@ class DetailsPanel(Static):
             Horizontal(
                 *[
                     Label("Description: ", classes="detail-key"),
-                    Label(data.series_description, classes="multi-line-box")
+                    Label(data.series_description, classes="detail-value")
                 ],
                 classes="detail-row"
             )
@@ -181,6 +197,8 @@ class DetailsPanel(Static):
             container.mount(book_block)
 
             # Add rows into the book_block
+            max_key: int = max_key_len(book.keys())
+
             for key, value in book.items():
 
                 if key == "Tag":
@@ -192,18 +210,11 @@ class DetailsPanel(Static):
 
                     row = Horizontal(
                         Label(
-                            f"{new_key}: ".title(),
+                            f"{new_key}: ".ljust(max_key + 2).title(),
                             classes="detail-key"
                         ),
                         (
-                            Label(
-                                value,
-                                classes=(
-                                    "detail-value"
-                                    if len(str(value)) < 60
-                                    else "detail-value-big"
-                                )
-                            )
+                            Label(value,classes="detail-value")
                             if new_key != "Database" else
                             Link(
                                 f"{value["@Name"]}/{value["@Item"]}",
@@ -221,6 +232,8 @@ class DetailsPanel(Static):
         container.remove_children()
 
         # --- Series Card ---
+        max_key: int = max_key_len(list_data.keys())
+
         series_block = Vertical(classes="detail-series")
 
         series_block.border_title = (
@@ -230,7 +243,7 @@ class DetailsPanel(Static):
         container.mount(series_block)
 
         series_block.mount(Horizontal(*[
-            Label("Database: ", classes="detail-key"),
+            Label("Database: ".ljust(max_key + 2).title(), classes="detail-key"),
             Link(
                 str(f"harcover/{list_data["slug"]}"),
                 url=f"https://hardcover.app/list/{list_data["slug"]}",
@@ -241,8 +254,8 @@ class DetailsPanel(Static):
         series_block.mount(
             Horizontal(
                 *[
-                    Label("Description: ", classes="detail-key"),
-                    Label(list_data["description"], classes="multi-line-box")
+                    Label("Length of List: ".ljust(max_key + 2).title(), classes="detail-key"),
+                    Label(str(list_data["book_count"]), classes="detail-value")
                 ],
                 classes="detail-row"
             )
@@ -251,8 +264,8 @@ class DetailsPanel(Static):
         series_block.mount(
             Horizontal(
                 *[
-                    Label("Follower Count: ", classes="detail-key"),
-                    Label(str(list_data["follower_count"]), classes="multi-line-box")
+                    Label("Description: ".ljust(max_key + 2).title(), classes="detail-key"),
+                    Label(list_data["description"], classes="detail-value")
                 ],
                 classes="detail-row"
             )
@@ -261,12 +274,49 @@ class DetailsPanel(Static):
         series_block.mount(
             Horizontal(
                 *[
-                    Label("Like Count: ", classes="detail-key"),
-                    Label(str(list_data["like_count"]), classes="multi-line-box")
+                    Label("Follower Count: ".ljust(max_key + 2).title(), classes="detail-key"),
+                    Label(str(list_data["follower_count"]), classes="detail-value")
                 ],
                 classes="detail-row"
             )
         )
+
+        series_block.mount(
+            Horizontal(
+                *[
+                    Label("Like Count: ".ljust(max_key + 2).title(), classes="detail-key"),
+                    Label(str(list_data["like_count"]), classes="detail-value")
+                ],
+                classes="detail-row"
+            )
+        )
+
+        for idx, book in enumerate(book_data, start=1):
+            # Mount the book_block container with key information as title
+            book_block = Vertical(classes="detail-book")
+            book_name = book["book_title"]
+            book_position = "NA" if book["list_position"] is None else book["list_position"]
+            book_block.border_title = (
+                f"Book {idx} -:- {book_name} -:- Position: {book_position}"
+            )
+            container.mount(book_block)
+
+            for key, value in book.items():
+                max_key: int = max_key_len(book.keys()) + 2
+
+                key = " ".join(key.split("_"))
+                key = key.ljust(max_key).title()
+                value = ( "\n".join(value) if key == "book_tags" else str(value) )
+                row = Horizontal(
+                    Label(f"{key}: ".title(), classes="detail-key"),
+                    Label(value, classes="detail-value"),
+                    classes="detail-row"
+                )
+                book_block.mount(row)
+
+
+            # Add rows into the book_block
+            #for key, value in book.items():
 
 
     def update_details(self, data: dict):
@@ -275,8 +325,8 @@ class DetailsPanel(Static):
         Returns a DataTable containing rows of key: value formatted
         somewhat nicely.
         """
-        ascii_text = data.pop("book_cover", DEFAULT_BOOK_COVER)
-        self.query_one("#book_cover", Static).update(ascii_text)
+        # ascii_text = data.pop("book_cover", DEFAULT_BOOK_COVER)
+        # self.query_one("#book_cover", Static).update(ascii_text)
 
         container = self.query_one("#details_rows", VerticalScroll)
         container.remove_children()
@@ -284,8 +334,7 @@ class DetailsPanel(Static):
         if not data:
             return
 
-        # This is smart, i should use this again elsewhere
-        max_key_len: int = max(len(k) for k in data.keys())
+        max_key: int = max_key_len(data.keys())
 
         # get list of keys in dict, and re-order so description is last
         # ugly i know
@@ -308,7 +357,7 @@ class DetailsPanel(Static):
 
             row.mount(
                 Label(
-                    f"{new_key.ljust(max_key_len + 2).title()}",
+                    f"{new_key.ljust(max_key + 2).title()}",
                     classes="detail-key")
             )
 
@@ -335,7 +384,7 @@ class DetailsPanel(Static):
                 row.mount(
                     Label(
                         content=str(info),
-                        classes="multi-line-box-2",
+                        classes="detail-value",
                         markup=True)
                 )
 
@@ -498,6 +547,7 @@ class MainContainer(TabbedContent):
                                 series_brl=brl
                             )
                         )
+
 
     def remove_series(self):
         series_list = self.query_one("#series_list", ListView)

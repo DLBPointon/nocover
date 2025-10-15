@@ -80,55 +80,6 @@ ListItem {
     color: white;
 }
 
-.detail-book {
-    border: round #6366f0;
-    border-title-color: white;
-    margin: 1;
-    padding: 1;
-    background: #1f2837;
-    height: auto;
-    width: 100%
-}
-
-#book_cover {
-    padding: 0;
-    margin: 0;
-    max-width: 20%
-}
-
-#book_details {
-    padding: 0 1;
-    margin: 0;
-    min-width: 20;
-    max-width: 75
-}
-
-#details_rows .detail-row {
-    height: auto;
-    padding: 0 1;
-    margin: 0
-}
-
-.detail-key {
-    text-style: bold
-}
-
-/* Normal single-line values */
-.detail-value {
-    min-height: 1;
-    max-height: 2;
-    overflow: hidden;
-    text-wrap: wrap;
-}
-
-/* Large multi-line values */
-.detail-value-big {
-    min-height: 5;
-    max-height: 20;
-    overflow-y: scroll;
-    text-wrap: wrap;
-}
-
 HelpModal {
     align: center middle;
     background: rgba(0, 0, 0, 0.7);  /* dim background */
@@ -139,12 +90,23 @@ SeriesAddModal {
     background: rgba(0, 0, 0, 0.7);  /* dim background */
 }
 
+#details_rows .detail-row {
+    height: auto;
+    padding: 0 1;
+    margin: 0;
+    max-width: 100;
+    text-wrap: wrap;
+}
+
+.detail-key {
+    text-style: bold
+}
 
 
 #popup {
     width: 60%;
     max-width: 75%;
-    height: auto;
+    height: 100%;
     border: solid white;
     padding: 2;
     background: #1f2837;
@@ -190,17 +152,27 @@ SeriesAddModal {
     content-align: center top;
 }
 
+.detail-value {
+    min-height: 1;
+    overflow: hidden;
+    text-wrap: wrap;
+    max-width: 65;
+    overflow-y: scroll;
+}
+
 .detail-series {
     border: round #6366f0;
     height: auto;
     border-title-color: white;
-    width: 85
+    width: 100%
 }
 
-.multi-line-box {
-    width: 70;
-}
-
-.multi-line-box-2 {
-    width: 60;
+.detail-book {
+    border: round #6366f0;
+    border-title-color: white;
+    margin: 1;
+    padding: 1;
+    background: #1f2837;
+    height: auto;
+    width: 100%
 }

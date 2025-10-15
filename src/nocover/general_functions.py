@@ -3,6 +3,10 @@ import requests
 import json
 
 
+def max_key_len(data_keys) -> int:
+    return max(len(k) for k in data_keys)
+
+
 def json_dump(data, file) -> None:
     """
     To make sure all json.dumps are the same

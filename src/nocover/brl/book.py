@@ -1,36 +1,36 @@
 class Book:
     def __init__(self, book_dict):
-        self.book_name          = book_dict["book"]["default_cover_edition"]["book"]["title"]
-        self.book_slug          = book_dict["book"]["slug"]
-        self.book_publisher     = self.get_publisher(book_dict)
-        self.book_isbn13        = self.get_isbn13(book_dict)
-        self.book_tags          = self.clean_book_tags(book_dict["book"]["taggings"])
-        release_data: str       = book_dict["book"]["default_cover_edition"]["book"][
-            "release_date"
-        ]
+        book_data = book_dict["book"]
+        cover_edition = book_data.get("default_cover_edition", {}).get("book", book_data)
+        self.book_name = cover_edition.get("title", "Unknown Title")
+        self.book_slug = book_data.get("slug")
+        self.book_publisher = self.get_publisher(cover_edition.get("publisher", None))
+        self.book_isbn13 = self.get_isbn13(cover_edition.get("isbn_13", None))
+        self.book_tags = self.clean_book_tags(cover_edition["taggings"])
+        release_data: str = cover_edition[ "release_date" ]
         self.release_year       = (
             "0000" if release_data is None else release_data.split("-")[0]
         )
         self.series_position    = (
             10000 if book_dict["position"] is None else book_dict["position"]
         )
-        self.series_pos_details = book_dict["details"]
+
+        book_deets = book_dict.get("details", None)
+        self.series_pos_details = "NA" if book_deets is None else book_deets
 
 
     def get_publisher(self, data: dict) -> str:
         """
         Get publisher from dict if publisher != None
         """
-        pub_name = data["book"]["default_cover_edition"]["publisher"]
-        return pub_name["name"] if pub_name is not None else "NA"
+        return data["name"] if data is not None else "NA"
 
 
-    def get_isbn13(self, data: dict) -> str:
+    def get_isbn13(self, data: str) -> str:
         """
         Get isbn13 from dict if isbn_13 != None
         """
-        isbn = data["book"]["default_cover_edition"]["isbn_13"]
-        return isbn if isbn is not None else "NA"
+        return data if data is not None else "NA"
 
 
     def clean_book_tags(self, data: list) -> list:

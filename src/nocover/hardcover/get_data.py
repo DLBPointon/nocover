@@ -25,6 +25,12 @@ class GetData:
         self.data = ( get_data["me"][0] if api_path == "profile" else get_data["me"][0][api_path] )
 
 
+    def format_tags(self, data):
+        """
+        format a long list of tags into a new line seperated list
+        """
+        return "\n".join(list(set(data)))
+
     def get_list_slugs(self):
         """
         Get the top level slug from the data

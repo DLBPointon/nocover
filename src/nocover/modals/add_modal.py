@@ -10,6 +10,7 @@ from nocover.modals.error_page import ErrorModal
 from nocover.config import Config
 
 from nocover.brl.book import Book
+from nocover.brl.list_book import ListBook
 from nocover.brl.generate_brl import generate_brl_file
 
 
@@ -59,10 +60,20 @@ class AddModal(ModalScreen):
             return False
 
 
-    def get_book_list(self, book_list: list[dict]) -> list[Book]:
-        """Convert dict of books into list of book objects"""
-        return [ Book(book_dict=book) for book in book_list ]
+    def sort_books(self, book_list):
+        return sorted(
+                    book_list,
+                    key=lambda x: x.series_position,
+                    reverse=False
+                )
 
+
+    def get_book_list(self, book_list: list[dict], type: str) -> list[Book|ListBook]:
+        """Convert dict of books into list of book objects"""
+        if type == "list":
+            return self.sort_books([ ListBook(book_dict=book) for book in book_list ])
+        else:
+            return self.sort_books([ Book(book_dict=book) for book in book_list ])
 
     def make_sure_item_dir_exists(self):
         """Make sure that the item dir exists and return its path"""

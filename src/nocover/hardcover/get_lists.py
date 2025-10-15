@@ -12,11 +12,13 @@ class ListData(GetData):
         self.slugs: list[str] = self.get_list_slugs()
         self.lists = self.reformat_data_by_dict()
 
-        with open("slugs.txt", 'w') as f:
-            json_dump(self.slugs, f)
 
-        with open("list.txt", 'w') as g:
-            json_dump(self.data, g)
+    def reorder_by_list_position(self, books):
+        return sorted(
+                        books,
+                        key=lambda x: x["list_position"],
+                        reverse=False
+                    )
 
 
     def corrected_book(self, book):
@@ -35,14 +37,16 @@ class ListData(GetData):
             "book_release_data": data["release_date"],
             "book_state": data["state"],
             "book_read_count": data["users_read_count"],
-            "book_tags": [ i["tag"]["tag"] for i in data["taggings"]]
+            "book_tags": self.format_tags([ i["tag"]["tag"] for i in data["taggings"]])
         }
 
 
     def corrected_book_list(self, book_list):
-        return [
-            self.corrected_book(i) for i in book_list
-        ]
+        return self.reorder_by_list_position(
+            [
+                self.corrected_book(i) for i in book_list
+            ]
+        )
 
 
     def reformat_data_by_dict(self):

@@ -163,7 +163,7 @@ class SeriesAddModal(AddModal):
 
     def reformat_book_data(self, data):
         clean_book_list, ghosts, compilations = self.clean_book_data(data)
-        book_list = self.get_book_list(clean_book_list)
+        book_list = self.get_book_list(clean_book_list, "series")
         return {
             "raw_book_count" :      len(data),
             "clean_book_count" :    len(book_list),
