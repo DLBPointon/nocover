@@ -21,18 +21,16 @@ Yeah, a TUI doesn't need to be a thing. However, I've wanted to make a TUI for a
 
 ## TODO's
 
-- maybe search for series and download as brl?
-
-- Search for book to add to `want-to-read`.
-
-- quick add Series, Lists and Prompts for tracking
-    - Tick toggle to add books to `want-to-read`
-
-- offline use
+- [ ] In case it could be used in another tool, choose where to save a BRL whilst defaulting to Config.SeriesPath
+- [ ] Search for book to add to `want-to-read`.
+- [X] Quick add Series
+- [ ] Quick add Lists - almost done
+- [ ] Quick add Prompts
+- [ ] Tick toggle to add books to `want-to-read`
+- [ ] Fully offline use
     - required downloading and storing of data
     - use a local db such as DuckDB?
     - Won't matter for series downloaded as BRL file (yes I will push this as much as possible, i think it would be helpful.)
 
-- Book Editor Modal
-
-- Better onboarding Modal
+- [ ] Book Editor Modal
+- [X] Better onboarding Modal
