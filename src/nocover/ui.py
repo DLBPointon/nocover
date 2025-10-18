@@ -31,10 +31,11 @@ from nocover.modals.prompt_add_modal import PromptAddModal
 from nocover.modals.read_modal import ReadModal
 
 # Local App Hardcover Imports
-from nocover.hardcover.raw_queries import HARDCOVER_PROFILE_QUERY, HARDCOVER_USER_BOOKS_BY_STATUS, FOLLOWED_LISTS
+from nocover.hardcover.raw_queries import HARDCOVER_PROFILE_QUERY, HARDCOVER_USER_BOOKS_BY_STATUS, FOLLOWED_LISTS, FOLLOWED_PROMPTS
 from nocover.hardcover.get_profile import Profile
 from nocover.hardcover.get_books import BookData as UserBookData
 from nocover.hardcover.get_lists import ListData as UserListData
+from nocover.hardcover.get_prompts import PromptData as UserPromptData
 from nocover.brl.read_series_brl import SeriesBrlData
 
 DEFAULT_BOOK_COVER = """
@@ -396,6 +397,7 @@ class MainContainer(TabbedContent):
         book_data: UserBookData,
         config_data: Config,
         list_data: UserListData,
+        prompt_data: UserPromptData,
         *args,
         **kwargs
     ):
@@ -403,25 +405,18 @@ class MainContainer(TabbedContent):
         self.profile_data = profile_data
         self.book_data = book_data
         self.list_data = list_data
+        self.prompt_data = prompt_data
         self.border_title = "Data Panel"
         self.config_data = config_data
         self.book_by_Status = book_data.dict_by_status
 
-
-    # @staticmethod
-    # def createListListItem(self):
-    #     return [
-    #         ListListItem(
-    #              line
-    #         ) for line in open(f"{self.config_data.path}/list_list.csv")
-    #     ]
 
     @staticmethod
     def createPromptListItem(self):
         return [
             PromptListItem(
                 line
-            ) for line in open(f"{self.config_data.path}/prompt_list.csv")
+            ) for line in open(self.config_data.index_file_dict["prompts"])
         ]
 
 
@@ -458,11 +453,6 @@ class MainContainer(TabbedContent):
             with TabPane(title="Series", id="list_series"):
                 with Horizontal(id="button-bar"):
                         yield Button(
-                            "Add",
-                            id="add_series",
-                            classes="general-button"
-                        )
-                        yield Button(
                             "Refresh",
                             id="refresh_active",
                             classes="general-button"
@@ -476,10 +466,10 @@ class MainContainer(TabbedContent):
                 yield ListView(
                     *[
                         SeriesListItem(
-                            series_name=line.split(',')[0],
-                            series_count=str(line.split(',')[1]),
-                            series_brl=line.split(',')[2]
-                        ) for line in open(f"{self.config_data.path}/series_list.csv")
+                            series_name=line.split("\t")[0],
+                            series_count=str(line.split("\t")[1]),
+                            series_brl=line.split("\t")[2]
+                        ) for line in open(self.config_data.index_file_dict["series"])
                     ],
                     id="series_list"
                 )
@@ -489,31 +479,62 @@ class MainContainer(TabbedContent):
                     with TabPane(
                         title="Followed lists", id=f"status-list-followed"
                     ):
-                        # This one would be the auto list_data tab
                         yield ListView(
                             *[
-                                ListListItem(i, self.list_data.lists[i]["list_information"]["name"], self.list_data.lists[i])
+                                ListListItem(
+                                    i,
+                                    self.list_data.lists[i]["list_information"]["name"],
+                                    self.list_data.lists[i]
+                                )
                                 for i in self.list_data.lists
                             ]
                         )
+
                     with TabPane(
                         title="Manually Followed", id=f"status-list-manual-followed"
                     ):
-                        with open("listlist2.txt", 'w') as file:
-                            json_dump(self.list_data.lists, file)
-
                         yield ListView(
                             *[
-                                ListListItem(i, self.list_data.lists[i]["list_information"]["name"], self.list_data.lists[i])
-                                for i in self.list_data.lists
-                            ]
+                                SeriesListItem(
+                                    series_name=line.split("\t")[0],
+                                    series_count=str(line.split("\t")[1]),
+                                    series_brl=line.split("\t")[2]
+                                ) for line in open(self.config_data.index_file_dict["lists"])
+                            ],
+                            id="series_list"
                         )
 
             with TabPane(title="Prompts", id="list_prompt"):
-                yield ListView(
-                    *self.createPromptListItem(self),
-                    id = "SeriesList"
-                )
+                with TabbedContent(initial="status-prompt-followed"):
+                    with TabPane(
+                        title="Followed Prompts", id="status-prompt-followed"
+                    ):
+                        yield ListView(
+                            *[
+                                ListListItem(
+                                    i,
+                                    self.prompt_data.lists[i]["list_information"]["name"],
+                                    self.prompt_data.lists[i]
+                                )
+                                for i in self.prompt_data.lists
+                            ]
+                        )
+
+
+                    with TabPane(
+                        title="Manual Follows", id="status-prompt-manual"
+                    ):
+                        yield ListView(
+                            *[
+                                SeriesListItem(
+                                    series_name=line.split("\t")[0],
+                                    series_count=str(line.split("\t")[1]),
+                                    series_brl=line.split("\t")[2]
+                                ) for line in open(self.config_data.index_file_dict["prompts"])
+                            ],
+                            id="series_list"
+                        )
+
 
             with TabPane(title="Profile", id="profile_page"):
                 yield ListView(
@@ -525,16 +546,16 @@ class MainContainer(TabbedContent):
 
 
     def refresh_series_list(self):
-            """Reload the series list from the CSV file."""
+            """Reload the series list from the TSV file."""
 
             # if active.pane == series
             series_list = self.query_one("#series_list", ListView)
             series_list.clear()
 
-            with open(f"{self.config_data.path}/series_list.csv") as f:
+            with open(self.config_data.index_file_dict["series"]) as f:
                 for line in f:
                     if not line == "\n":
-                        name, count, brl = line.strip().split(",")
+                        name, count, brl = line.strip().split("\t")
 
                         # Doesn't actually get triggered... annoyingly
                         if not os.path.exists(brl.strip()):
@@ -565,19 +586,19 @@ class MainContainer(TabbedContent):
         item.remove()
 
         # Remove from CSV
-        csv_file = f"{self.config_path}/series_list.csv"
+        csv_file = self.config_data.index_file_dict["series"]
         with open(csv_file, "r") as f:
             lines = f.readlines()
 
         # make tmp file
-        with open(f"{self.config_path}/.series_list.csv", "w") as n:
+        with open(f"{csv_file}.tmp", "w") as n:
             for line in lines:
                 if not line == f"{series_name},{series_count},{series_brl}":
                     n.write(line)
 
         # remove original, cp tmp over it
         os.remove(csv_file)
-        os.rename(".series_list.csv", csv_file)
+        os.rename(f"{csv_file}.tmp", csv_file)
         os.remove(series_brl.strip())
 
         # Disable button again
@@ -624,7 +645,7 @@ class NCScreen(Screen):
         overlay = self.query_one("#loading_overlay", LoadingScreen)
         offline = False
 
-        overlay.update_status("Loading profile data...")
+        overlay.update_status("Loading Profile data...")
         self.profile_data = Profile(
             query=HARDCOVER_PROFILE_QUERY,
             api_path="profile",
@@ -632,7 +653,7 @@ class NCScreen(Screen):
             offline=offline,
         )
 
-        overlay.update_status("Loading book data...")
+        overlay.update_status("Loading Book data...")
         self.book_data = UserBookData(
             query=HARDCOVER_USER_BOOKS_BY_STATUS,
             api_path="user_books",
@@ -640,10 +661,18 @@ class NCScreen(Screen):
             offline=offline,
         )
 
-        overlay.update_status("Loading saved list data...")
+        overlay.update_status("Loading saved List data...")
         self.list_data = UserListData(
             query=FOLLOWED_LISTS,
             api_path="lists",
+            config_path=self.config_data,
+            offline=offline
+        )
+
+        overlay.update_status("Loading saved Prompt data...")
+        self.prompt_data = UserPromptData (
+            query=FOLLOWED_PROMPTS,
+            api_path="prompts",
             config_path=self.config_data,
             offline=offline
         )
@@ -671,6 +700,7 @@ class NCScreen(Screen):
                     profile_data=self.profile_data,
                     book_data=self.book_data,
                     list_data=self.list_data,
+                    prompt_data=self.prompt_data,
                     config_data=self.config_data,
                 ),
                 DetailsPanel(id="book_panel"),
@@ -746,11 +776,11 @@ class NCApp(App):
 
     def action_listAdd(self):
         """Show modal for adding a list to local tracking"""
-        self.push_screen(ListAddModal(title="list", config=self.config_data))
+        self.push_screen(ListAddModal(title="lists", config=self.config_data))
 
     def action_promptAdd(self):
         """Show modal for adding a prompt to local tracking"""
-        self.push_screen(PromptAddModal(title="prompt", config=self.config_data))
+        self.push_screen(PromptAddModal(title="prompts", config=self.config_data))
 
     def action_read(self):
         """API move book from want-to-read to read"""

@@ -86,12 +86,12 @@ def output_brl(
         series, "Database",
         {
             "Name": "Hardcover",
-            "Item": series_data["series_slug"]
+            "Item": series_data.get("series_slug", series_data["slug"])
         },
     )
 
     series_descrption = SubElement(series, "Description",)
-    series_descrption.text = series_data["series_description"]
+    series_descrption.text = series_data.get("series_description", series_data["description"])
 
     numbooks = SubElement(root2, "NumBooks")
     numbooks.text = str(len(book_data))

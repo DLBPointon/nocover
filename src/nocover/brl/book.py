@@ -12,7 +12,7 @@ class Book:
             "0000" if release_data is None else release_data.split("-")[0]
         )
         self.series_position    = (
-            10000 if book_dict["position"] is None else book_dict["position"]
+            10000 if book_dict.get("position", None) is None else book_dict["position"]
         )
 
         book_deets = book_dict.get("details", None)

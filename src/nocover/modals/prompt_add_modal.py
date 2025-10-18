@@ -10,37 +10,44 @@ from textual.app import ComposeResult
 from nocover.modals.add_modal import AddModal
 from nocover.modals.error_page import ErrorModal
 
-from nocover.hardcover.raw_queries import FOLLOWED_PROMPTS
+from nocover.hardcover.raw_queries import SEARCH_PROMPT
 
 from nocover.config import Config
+from nocover.brl.generate_brl import generate_brl_file
 
 
 class PromptAddModal(AddModal):
 
-    def sort_api_return(self):
-        """Get data from API and parse into header + book list"""
-
-        api_data = self.get_query_from_api(FOLLOWED_PROMPTS)
-        if isinstance(api_data, bool):
-           if not api_data:
-              ErrorModal(
-                  message = "Error in return from API - check your API key and internet connection"
-              )
-        elif isinstance(api_data, dict):
-            #header, book_list = self.clean_data(api_data)
-            with open("testing.json", "w") as out:
-                json.dump(api_data["me"][0]["followed_prompts"],out)
-
-        else:
-            ErrorModal(
-                message = "You shouldn't be here..."
-            )
-
-
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save":
-            self.sort_api_return()
+            prompt_data = self.parse_data(SEARCH_PROMPT)
+
+            data = prompt_data["prompts"][0]
+
+            prompt_info, books = self.split_data(data, "prompt_books")
+
+            reformatted_books = self.get_book_list(books, "prompts")
+
+            save_location = self.validate_save_directory()
+
+            generate_brl_file(
+                book_list = reformatted_books,
+                save_location = f"{save_location}/{self.slug_input.value}.brl",
+                series_data = prompt_info,
+                add_tags = False,
+                universe = "",
+                universe_position = ""
+            )
+
+            self.update_index_file(
+                prompt_info["name"],
+                len(reformatted_books),
+                f"{save_location}\n"
+            )
+
+            self.dismiss("saved")
+
         elif event.button.id == "cancel":
             self.app.pop_screen()
         else:

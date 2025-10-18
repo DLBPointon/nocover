@@ -6,7 +6,7 @@ A TUI application to supplement Hardcover.
 
 ## Why?
 
-Yeah, a TUI doesn't need to be a thing. However, I've wanted to make a TUI for a while and Hardcover is a project i'm interested enough in to give it a go.
+Yeah, a TUI for this doesn't need to be a thing. However, I've wanted to make a TUI for a while and Hardcover is a project i'm interested enough in to give it a go.
 
 ## Features
 
@@ -21,16 +21,24 @@ Yeah, a TUI doesn't need to be a thing. However, I've wanted to make a TUI for a
 
 ## TODO's
 
-- [ ] In case it could be used in another tool, choose where to save a BRL whilst defaulting to Config.SeriesPath
-- [ ] Search for book to add to `want-to-read`.
+- [X] In case it could be used in another tool, choose where to save a BRL whilst defaulting to Config.SeriesPath
+- [ ] Search for book to add to `want-to-read`, `read` or a local private list.
+- [X] Loading Screen
 - [X] Quick add Series
-- [ ] Quick add Lists - almost done
-- [ ] Quick add Prompts
+- [X] Quick add Lists
+- [X] Quick add Prompts
+- [ ] General Improvements to displaying data
 - [ ] Tick toggle to add books to `want-to-read`
 - [ ] Fully offline use
-    - required downloading and storing of data
+    - required downloading and storing of data in format that is easy to access.
     - use a local db such as DuckDB?
     - Won't matter for series downloaded as BRL file (yes I will push this as much as possible, i think it would be helpful.)
-
 - [ ] Book Editor Modal
 - [X] Better onboarding Modal
+- [ ] Add book descriptions to brl file generation
+- [ ] Add another...? To a modal.
+- [ ] Add Logging
+- [X] Move all config path into Config
+    - Rewrote a couple of functions around this
+    - Turns out I was manually building the path EVERY time i used it!
+- [X] Convert to using TSV rather than CSV as many lists and prompts may have "," in title.

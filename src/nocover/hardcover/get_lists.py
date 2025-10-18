@@ -13,42 +13,6 @@ class ListData(GetData):
         self.lists = self.reformat_data_by_dict()
 
 
-    def reorder_by_list_position(self, books):
-        return sorted(
-                        books,
-                        key=lambda x: x["list_position"],
-                        reverse=False
-                    )
-
-
-    def corrected_book(self, book):
-        data = book["book"]
-        return {
-            "list_position": book["position"],
-            "book_title": data["title"],
-            "book_series": [ i["series"]["slug"] for i in data["book_series"] ],
-            "book_description": data["description"].encode().decode('unicode-escape'),
-            "book_pages": data["pages"],
-            "book_hc_creation": data["created_at"],
-            "book_cover": data["image"]["url"],
-            "book_ratings": data["rating"],
-            "book_ratings_count": data["ratings_count"],
-            "book_review_count": data["reviews_count"],
-            "book_release_data": data["release_date"],
-            "book_state": data["state"],
-            "book_read_count": data["users_read_count"],
-            "book_tags": self.format_tags([ i["tag"]["tag"] for i in data["taggings"]])
-        }
-
-
-    def corrected_book_list(self, book_list):
-        return self.reorder_by_list_position(
-            [
-                self.corrected_book(i) for i in book_list
-            ]
-        )
-
-
     def reformat_data_by_dict(self):
         """
         Reformat the list data into something more sensible

@@ -12,46 +12,36 @@ from nocover.modals.error_page import ErrorModal
 from nocover.hardcover.raw_queries import SEARCH_LISTS
 
 from nocover.config import Config
+from nocover.brl.generate_brl import generate_brl_file
 
 
 class ListAddModal(AddModal):
 
-    def parse_data(self):
-        raw_data = self.get_query_from_api(SEARCH_LISTS)
-        if isinstance(raw_data, bool):
-            self.app.push_screen(
-                ErrorModal("NO DATA!")
-            )
-
-        return raw_data
-
-
-    def split_data(self, data):
-        list_data: dict = {
-            "slug": data["slug"],
-            "name": data["name"],
-            "followers_count": str(data["followers_count"]),
-            "description": data["description"],
-            "created_at": data["created_at"],
-            "books_count": str(data["books_count"])
-        }
-
-        return list_data, data["list_books"]
-
-
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save":
-            list_data = self.parse_data()
+            list_data = self.parse_data(SEARCH_LISTS)
             data = list_data["lists"][0]
 
-            list, books = self.split_data(data)
+            list_info, books = self.split_data(data, "list_data")
 
             reformatted_books = self.get_book_list(books, "list")
 
-            #the-esquire-75-best-sci-fi-books-of-all-time
+            save_location = self.validate_save_directory()
 
-            # now generate list_brl
-            # now update list.csv
+            generate_brl_file(
+                book_list = reformatted_books,
+                save_location = f"{save_location}/{list_info["slug"]}.brl",
+                series_data = list_info,
+                add_tags = False,
+                universe = "",
+                universe_position = ""
+            )
+
+            self.update_index_file(
+                list_info["name"],
+                len(reformatted_books),
+                f"{save_location}\n"
+            )
 
             self.dismiss("saved")
 

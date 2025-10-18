@@ -186,9 +186,9 @@ class SeriesAddModal(AddModal):
                     ErrorModal("Invalid series slug - no data returned from Hardcover")
                 )
 
-            item_path = self.make_sure_item_dir_exists()
+            save_location = self.validate_save_directory()
 
-            brl_location: str = item_path + self.slug_input.value + ".brl"
+            brl_location: str = save_location + self.slug_input.value + ".brl"
             if not os.path.exists(brl_location):
                 reformatted_series_data: dict[str, str] = self.reformat_series_data(series_data)
 
@@ -217,7 +217,7 @@ class SeriesAddModal(AddModal):
                 self.update_index_file(
                     reformatted_series_data["name"],
                     reformatted_book_data["clean_book_count"],
-                    item_path + reformatted_series_data["series_slug"] + ".brl\n"
+                    save_location + reformatted_series_data["series_slug"] + ".brl\n"
                 )
 
                 self.dismiss("saved")

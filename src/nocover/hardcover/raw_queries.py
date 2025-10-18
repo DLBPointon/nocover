@@ -115,32 +115,37 @@ SEARCH_SERIES = """
 FOLLOWED_PROMPTS = """
 {
   me {
-    followed_prompts {
-      prompt {
-        answers_count
-        books_count
-        created_at
-        description
-        question
-        prompt_books {
-          answers_count
-          book {
-            slug
-            title
-            rating
-            ratings_count
-            release_date
-            reviews_count
-            description
-            taggings_aggregate {
-              nodes {
-                tag {
-                  tag_category {
-                    category
-                  }
-                  tag
-                }
-              }
+    prompts {
+      slug
+      books_count
+      description
+      question
+      prompt_books {
+        book {
+          slug
+          title
+          release_date
+          rating
+          ratings_count
+          pages
+          reviews_count
+          description
+          state
+          users_read_count
+          created_at
+          image {
+            url
+          }
+          description
+          book_series {
+            series {
+              slug
+              name
+            }
+          }
+          taggings {
+            tag {
+              tag
             }
           }
         }
@@ -154,41 +159,41 @@ FOLLOWED_PROMPTS = """
 SEARCH_PROMPT = """
 {
   prompts(where: {slug: {_eq: SLUG }}) {
+    slug
     answers_count
     books_count
     created_at
     description
     question
     prompt_books {
-      answers_count
-      book {
-        slug
-        title
-        rating
-        ratings_count
-        release_date
-        reviews_count
-        image {
-          url
-        }
-        description
-        book_series {
-          series {
-            slug
-            name
+        book {
+          slug
+          title
+          release_date
+          rating
+          ratings_count
+          pages
+          reviews_count
+          description
+          state
+          users_read_count
+          created_at
+          image {
+            url
           }
-        }
-        taggings {
-          tag {
-            tag_category {
-              id
-              tags {
-                tag
-              }
+          description
+          book_series {
+            series {
+              slug
+              name
+            }
+          }
+          taggings {
+            tag {
+              tag
             }
           }
         }
-      }
     }
   }
 }
