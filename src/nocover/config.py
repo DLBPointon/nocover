@@ -10,7 +10,8 @@ class Config:
         self.default_folders: dict[str, str] = {
             "lists": self.path + "/list_data/",
             "series": self.path + "/series_data/",
-            "prompts": self.path + "/prompt_data/"
+            "prompts": self.path + "/prompt_data/",
+            "logging": self.path + "/logs/"
         }
 
         self.index_file_dict: dict[str,str] = {

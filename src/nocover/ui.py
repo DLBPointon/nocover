@@ -1,10 +1,5 @@
 # General Package Imports
 import os
-from pathlib import Path
-import json
-from textual import work
-import asyncio
-
 
 # Textual Package Import
 from textual.app import App, ComposeResult
@@ -15,7 +10,6 @@ from textual.widgets import Label, TabbedContent, TabPane, ListView
 from textual.widgets import Footer, Button, Input, Static, Link
 
 # Local App Importsfrom textual.widgets import Label
-from nocover.appinfo import VERSION, APP_NAME
 from nocover.config import Config
 from nocover.list_items import BookListItem, SeriesListItem, ListListItem, PromptListItem, ProfilePublicListItem, ProfileBooksListItem, ProfilePersonalListItem
 from nocover.loading_screen import LoadingScreen
@@ -477,7 +471,7 @@ class MainContainer(TabbedContent):
             with TabPane(title="Lists", id="list_list"):
                 with TabbedContent(initial="status-list-followed"):
                     with TabPane(
-                        title="Followed lists", id=f"status-list-followed"
+                        title="Followed lists", id="status-list-followed"
                     ):
                         yield ListView(
                             *[
@@ -491,7 +485,7 @@ class MainContainer(TabbedContent):
                         )
 
                     with TabPane(
-                        title="Manually Followed", id=f"status-list-manual-followed"
+                        title="Manually Followed", id="status-list-manual-followed"
                     ):
                         yield ListView(
                             *[

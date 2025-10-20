@@ -1,18 +1,11 @@
-import os
-import json
-import requests
 
-from textual.screen import ModalScreen
-from textual.widgets import Input, Label, Button, Checkbox
-from textual.containers import Vertical, Horizontal
-from textual.app import ComposeResult
+from textual.widgets import Button
 
 from nocover.modals.add_modal import AddModal
 from nocover.modals.error_page import ErrorModal
 
 from nocover.hardcover.raw_queries import SEARCH_PROMPT
 
-from nocover.config import Config
 from nocover.brl.generate_brl import generate_brl_file
 
 

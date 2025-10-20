@@ -1,7 +1,6 @@
 from textual.widgets import ListItem, Label
 
 from nocover.hardcover.get_profile import Profile
-from nocover.general_functions import json_dump
 
 class BookListItem(ListItem):
     def __init__(self, book_data: dict):

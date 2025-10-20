@@ -21,12 +21,7 @@ Yeah, a TUI for this doesn't need to be a thing. However, I've wanted to make a 
 
 ## TODO's
 
-- [X] In case it could be used in another tool, choose where to save a BRL whilst defaulting to Config.SeriesPath
 - [ ] Search for book to add to `want-to-read`, `read` or a local private list.
-- [X] Loading Screen
-- [X] Quick add Series
-- [X] Quick add Lists
-- [X] Quick add Prompts
 - [ ] General Improvements to displaying data
 - [ ] Tick toggle to add books to `want-to-read`
 - [ ] Fully offline use
@@ -34,10 +29,17 @@ Yeah, a TUI for this doesn't need to be a thing. However, I've wanted to make a 
     - use a local db such as DuckDB?
     - Won't matter for series downloaded as BRL file (yes I will push this as much as possible, i think it would be helpful.)
 - [ ] Book Editor Modal
-- [X] Better onboarding Modal
 - [ ] Add book descriptions to brl file generation
 - [ ] Add another...? To a modal.
 - [ ] Add Logging
+
+### Pre-November updates
+- [X] In case it could be used in another tool, choose where to save a BRL whilst defaulting to Config.SeriesPath
+- [X] Loading Screen
+- [X] Quick add Series
+- [X] Quick add Lists
+- [X] Quick add Prompts
+- [X] Better onboarding Modal
 - [X] Move all config path into Config
     - Rewrote a couple of functions around this
     - Turns out I was manually building the path EVERY time i used it!

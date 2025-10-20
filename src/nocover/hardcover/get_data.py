@@ -1,4 +1,3 @@
-import json
 
 from nocover.config import Config
 
@@ -18,7 +17,7 @@ class GetData:
             get_remote_data(query=query, token=self.config.token, url=self.db_url)
         )
         allowed_api_paths = ["lists", "user_books", "prompts"]
-        if not api_path in ["lists", "user_books", "profile", "prompts"]:
+        if api_path not in ["lists", "user_books", "profile", "prompts"]:
             ErrorModal(f"Dev made an error, they used {api_path} where only one the below is allowed:\n{allowed_api_paths}")
 
         # Profile data is processed differently

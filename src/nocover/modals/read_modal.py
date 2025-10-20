@@ -1,5 +1,5 @@
 from textual.screen import ModalScreen
-from textual.widgets import Static, Button, Label
+from textual.widgets import Button, Label
 from textual.containers import Vertical, Horizontal
 from textual.app import ComposeResult
 
@@ -12,7 +12,7 @@ class ReadModal(ModalScreen):
 
     def compose(self) -> ComposeResult:
         with Vertical(id="popup"):
-            yield Label(f"Pinging the API that you've read the book...", id="popup-title")
+            yield Label("Pinging the API that you've read the book...", id="popup-title")
 
             with Horizontal(id="popup-buttons"):
                 yield Button("Save", id="save", variant="success")

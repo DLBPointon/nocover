@@ -2,7 +2,6 @@ from nocover.config import Config
 
 from nocover.hardcover.get_data import GetData
 
-from nocover.general_functions import get_remote_data
 
 
 class Profile(GetData):
