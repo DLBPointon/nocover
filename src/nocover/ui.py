@@ -1,17 +1,32 @@
 # General Package Imports
 import os
+from typing import final
 
 # Textual Package Import
 from textual.app import App, ComposeResult
 from textual.screen import ModalScreen, Screen
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical, HorizontalScroll,VerticalScroll, Container
+from textual.containers import (
+    Horizontal,
+    Vertical,
+    HorizontalScroll,
+    VerticalScroll,
+    Container,
+)
 from textual.widgets import Label, TabbedContent, TabPane, ListView
 from textual.widgets import Footer, Button, Input, Static, Link
 
 # Local App Importsfrom textual.widgets import Label
 from nocover.config import Config
-from nocover.list_items import BookListItem, SeriesListItem, ListListItem, PromptListItem, ProfilePublicListItem, ProfileBooksListItem, ProfilePersonalListItem
+from nocover.list_items import (
+    BookListItem,
+    SeriesListItem,
+    ListListItem,
+    PromptListItem,
+    ProfilePublicListItem,
+    ProfileBooksListItem,
+    ProfilePersonalListItem,
+)
 from nocover.loading_screen import LoadingScreen
 from nocover.general_functions import json_dump, max_key_len
 
@@ -25,7 +40,12 @@ from nocover.modals.prompt_add_modal import PromptAddModal
 from nocover.modals.read_modal import ReadModal
 
 # Local App Hardcover Imports
-from nocover.hardcover.raw_queries import HARDCOVER_PROFILE_QUERY, HARDCOVER_USER_BOOKS_BY_STATUS, FOLLOWED_LISTS, FOLLOWED_PROMPTS
+from nocover.hardcover.raw_queries import (
+    HARDCOVER_PROFILE_QUERY,
+    HARDCOVER_USER_BOOKS_BY_STATUS,
+    FOLLOWED_LISTS,
+    FOLLOWED_PROMPTS,
+)
 from nocover.hardcover.get_profile import Profile
 from nocover.hardcover.get_books import BookData as UserBookData
 from nocover.hardcover.get_lists import ListData as UserListData
@@ -43,30 +63,18 @@ DEFAULT_BOOK_COVER = """
 
 
 class MissingConfigOption(ModalScreen[None]):
-    """
+    """ """
 
-    """
-    def __init__(
-        self,
-        config_path: str,
-        config_data: Config
-    ) -> None:
+    def __init__(self, config_path: str, config_data: Config) -> None:
         super().__init__()
-        self.config_path: str           = config_path
-        self.config_data: Config        = config_data
-        self.config_input: Input        = Input(
-            placeholder = "Hardcover Token"
-        )
-        self.email_input: Input         = Input(
-            placeholder = "eto_demerzel@trantor.empire"
-        )
-
+        self.config_path: str = config_path
+        self.config_data: Config = config_data
+        self.config_input: Input = Input(placeholder="Hardcover Token")
+        self.email_input: Input = Input(placeholder="eto_demerzel@trantor.empire")
 
     def compose(self) -> ComposeResult:
         with Vertical(classes="popup"):
-            yield Label(
-                "Config file missing. Please enter your Hardcover API Token:"
-            )
+            yield Label("Config file missing. Please enter your Hardcover API Token:")
             yield self.config_input
 
             yield Label("It's helpful to have your email too!")
@@ -76,24 +84,20 @@ class MissingConfigOption(ModalScreen[None]):
                 yield Button("Save", id="save", variant="success")
                 yield Button("Cancel", id="cancel", variant="error")
 
-
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save":
-
             # validated_input = self.validate_config_input()
 
             with open(self.config_path + "/.config", "w") as f:
                 data: dict[str, str] = {
-                    "HARDCOVER_API_TOKEN"   : self.config_input.value,
-                    "EMAIL"                 : self.email_input.value
+                    "HARDCOVER_API_TOKEN": self.config_input.value,
+                    "EMAIL": self.email_input.value,
                 }
                 json_dump(data, f)
 
             self.app.pop_screen()
             self.app.push_screen(
-                NCScreen(
-                    Config(self.config_path)
-                )
+                NCScreen(Config(self.config_path))
             )  # go to main screen
 
         elif event.button.id == "cancel":
@@ -112,7 +116,6 @@ class DetailsPanel(Static):
         super().__init__(*args, **kwargs)
         self.border_title = "Details Panel"
 
-
     def compose(self) -> ComposeResult:
         with Horizontal(id="BookBox"):
             # Left containter is the ASCII cover (static)
@@ -125,7 +128,8 @@ class DetailsPanel(Static):
             # generated at:
             # https://patorjk.com/software/taag/#p=display&f=Alligator2&t=NC&x=none&v=4&h=4&w=80&we=false
             yield VerticalScroll(
-                Static(content = """
+                Static(
+                    content="""
                     ::::    :::  ::::::::
                     :+:+:   :+: :+:    :+:
                     :+:+:+  +:+ +:+
@@ -133,10 +137,10 @@ class DetailsPanel(Static):
                     +#+  +#+#+# +#+
                     #+#   #+#+# #+#    #+#
                     ###    ####  ########
-                    """),
-                id="details_rows"
+                    """
+                ),
+                id="details_rows",
             )
-
 
     def update_series_details(self, data: SeriesBrlData) -> None:
         """Update panel with ListItem per book in SeriesBrlData."""
@@ -146,32 +150,35 @@ class DetailsPanel(Static):
         # --- Series Card ---
         series_block = Vertical(classes="detail-series")
 
-        series_block.border_title = (
-            f"Series overview: [b][u]{data.series_name}[/u][/b]"
-        )
+        series_block.border_title = f"Series overview: [b][u]{data.series_name}[/u][/b]"
 
         container.mount(series_block)
 
-        series_block.mount(Horizontal(*[
-            Label(data.universe)], classes="detail-row")
-        )
+        series_block.mount(Horizontal(*[Label(data.universe)], classes="detail-row"))
 
-        series_block.mount(Horizontal(*[
-            Label("Database: ", classes="detail-key"),
-            Link(
-                str(f"{data.database_info["@Name"]}/{data.database_info["@Item"]}"),
-                url=f"https://hardcover.app/series/{data.database_info["@Item"]}",
-                tooltip=f"Head to Hardcover page for {data.series_name}"
+        series_block.mount(
+            Horizontal(
+                *[
+                    Label("Database: ", classes="detail-key"),
+                    Link(
+                        str(
+                            f"{data.database_info['@Name']}/{data.database_info['@Item']}"
+                        ),
+                        url=f"https://hardcover.app/series/{data.database_info['@Item']}",
+                        tooltip=f"Head to Hardcover page for {data.series_name}",
+                    ),
+                ],
+                classes="detail-row",
             )
-        ], classes="detail-row"))
+        )
 
         series_block.mount(
             Horizontal(
                 *[
                     Label("Description: ", classes="detail-key"),
-                    Label(data.series_description, classes="detail-value")
+                    Label(data.series_description, classes="detail-value"),
                 ],
-                classes="detail-row"
+                classes="detail-row",
             )
         )
 
@@ -181,11 +188,10 @@ class DetailsPanel(Static):
             books = [books]
 
         for idx, book in enumerate(books, start=1):
-
             # Mount the book_block container with key information as title
             book_block = Vertical(classes="detail-book")
-            book_name = book.get('@Name','Unknown')
-            book_position = book.get('@Position', 'Unknown')
+            book_name = book.get("@Name", "Unknown")
+            book_position = book.get("@Position", "Unknown")
             book_block.border_title = (
                 f"Book {idx} -:- {book_name} -:- Position: {book_position}"
             )
@@ -195,7 +201,6 @@ class DetailsPanel(Static):
             max_key: int = max_key_len(book.keys())
 
             for key, value in book.items():
-
                 if key == "Tag":
                     value = "\n".join(value)
 
@@ -206,23 +211,24 @@ class DetailsPanel(Static):
                     row = Horizontal(
                         Label(
                             f"{new_key}: ".ljust(max_key + 2).title(),
-                            classes="detail-key"
+                            classes="detail-key",
                         ),
                         (
-                            Label(value,classes="detail-value")
-                            if new_key != "Database" else
-                            Link(
-                                f"{value["@Name"]}/{value["@Item"]}",
-                                url=f"https://hardcover.app/books/{value["@Item"]}",
-                                tooltip=f"Head to Hardcover page for {book_name}"
+                            Label(value, classes="detail-value")
+                            if new_key != "Database"
+                            else Link(
+                                f"{value['@Name']}/{value['@Item']}",
+                                url=f"https://hardcover.app/books/{value['@Item']}",
+                                tooltip=f"Head to Hardcover page for {book_name}",
                             )
                         ),
-                        classes="detail-row"
+                        classes="detail-row",
                     )
                     book_block.mount(row)
 
-
-    def update_list_details(self, list_data: dict, book_data: dict) -> None:
+    def update_list_details(
+        self, list_data: dict[str, str], book_data: dict[str, str]
+    ) -> None:
         container = self.query_one("#details_rows", VerticalScroll)
         container.remove_children()
 
@@ -231,58 +237,73 @@ class DetailsPanel(Static):
 
         series_block = Vertical(classes="detail-series")
 
-        series_block.border_title = (
-            f"List overview: [b][u]{list_data["name"]}[/u][/b]"
-        )
+        series_block.border_title = f"List overview: [b][u]{list_data['name']}[/u][/b]"
 
         container.mount(series_block)
 
-        series_block.mount(Horizontal(*[
-            Label("Database: ".ljust(max_key + 2).title(), classes="detail-key"),
-            Link(
-                str(f"harcover/{list_data["slug"]}"),
-                url=f"https://hardcover.app/list/{list_data["slug"]}",
-                tooltip=f"Head to Hardcover page for {list_data["name"]}"
-            )
-        ], classes="detail-row"))
-
         series_block.mount(
             Horizontal(
                 *[
-                    Label("Length of List: ".ljust(max_key + 2).title(), classes="detail-key"),
-                    Label(str(list_data["book_count"]), classes="detail-value")
+                    Label(
+                        "Database: ".ljust(max_key + 2).title(), classes="detail-key"
+                    ),
+                    Link(
+                        str(f"harcover/{list_data['slug']}"),
+                        url=f"https://hardcover.app/list/{list_data['slug']}",
+                        tooltip=f"Head to Hardcover page for {list_data['name']}",
+                    ),
                 ],
-                classes="detail-row"
+                classes="detail-row",
             )
         )
 
         series_block.mount(
             Horizontal(
                 *[
-                    Label("Description: ".ljust(max_key + 2).title(), classes="detail-key"),
-                    Label(list_data["description"], classes="detail-value")
+                    Label(
+                        "Length of List: ".ljust(max_key + 2).title(),
+                        classes="detail-key",
+                    ),
+                    Label(str(list_data["book_count"]), classes="detail-value"),
                 ],
-                classes="detail-row"
+                classes="detail-row",
             )
         )
 
         series_block.mount(
             Horizontal(
                 *[
-                    Label("Follower Count: ".ljust(max_key + 2).title(), classes="detail-key"),
-                    Label(str(list_data["follower_count"]), classes="detail-value")
+                    Label(
+                        "Description: ".ljust(max_key + 2).title(), classes="detail-key"
+                    ),
+                    Label(list_data["description"], classes="detail-value"),
                 ],
-                classes="detail-row"
+                classes="detail-row",
             )
         )
 
         series_block.mount(
             Horizontal(
                 *[
-                    Label("Like Count: ".ljust(max_key + 2).title(), classes="detail-key"),
-                    Label(str(list_data["like_count"]), classes="detail-value")
+                    Label(
+                        "Follower Count: ".ljust(max_key + 2).title(),
+                        classes="detail-key",
+                    ),
+                    Label(str(list_data["follower_count"]), classes="detail-value"),
                 ],
-                classes="detail-row"
+                classes="detail-row",
+            )
+        )
+
+        series_block.mount(
+            Horizontal(
+                *[
+                    Label(
+                        "Like Count: ".ljust(max_key + 2).title(), classes="detail-key"
+                    ),
+                    Label(str(list_data["like_count"]), classes="detail-value"),
+                ],
+                classes="detail-row",
             )
         )
 
@@ -290,7 +311,9 @@ class DetailsPanel(Static):
             # Mount the book_block container with key information as title
             book_block = Vertical(classes="detail-book")
             book_name = book["book_title"]
-            book_position = "NA" if book["list_position"] is None else book["list_position"]
+            book_position = (
+                "NA" if book["list_position"] is None else book["list_position"]
+            )
             book_block.border_title = (
                 f"Book {idx} -:- {book_name} -:- Position: {book_position}"
             )
@@ -301,20 +324,18 @@ class DetailsPanel(Static):
 
                 key = " ".join(key.split("_"))
                 key = key.ljust(max_key).title()
-                value = ( "\n".join(value) if key == "book_tags" else str(value) )
+                value = "\n".join(value) if key == "book_tags" else str(value)
                 row = Horizontal(
                     Label(f"{key}: ".title(), classes="detail-key"),
                     Label(value, classes="detail-value"),
-                    classes="detail-row"
+                    classes="detail-row",
                 )
                 book_block.mount(row)
 
-
             # Add rows into the book_block
-            #for key, value in book.items():
+            # for key, value in book.items():
 
-
-    def update_details(self, data: dict):
+    def update_details(self, data: dict[str, str]):
         """
         Update panel with arbitrary key:value pairs from `data`.
         Returns a DataTable containing rows of key: value formatted
@@ -341,7 +362,7 @@ class DetailsPanel(Static):
                     key_list.append("description")
 
         for key in key_list:
-        # for key, value in data.items():
+            # for key, value in data.items():
             # create row and mount it into the container first
             row: Horizontal = Horizontal(classes="detail-row")
             container.mount(row)
@@ -351,37 +372,28 @@ class DetailsPanel(Static):
             # now we can mount children into the row
 
             row.mount(
-                Label(
-                    f"{new_key.ljust(max_key + 2).title()}",
-                    classes="detail-key")
+                Label(f"{new_key.ljust(max_key + 2).title()}", classes="detail-key")
             )
 
             # The join/split attempts to remove some of the double spacing
             # going on in the large text fields
             if key == "book_series":
                 info = [i["series"]["name"] for i in data[key] if i["series"]]
-                info = ( "None" if len(info) < 1 else info )
+                info = "None" if len(info) < 1 else info
             else:
                 info = data[key]
 
             if key == "title":
-
                 row.mount(
                     Link(
                         str(info),
-                        url=f"https://hardcover.app/books/{data["slug"]}",
-                        tooltip=f"Head to Hardcover page for {info}"
+                        url=f"https://hardcover.app/books/{data['slug']}",
+                        tooltip=f"Head to Hardcover page for {info}",
                     )
                 )
 
             else:
-
-                row.mount(
-                    Label(
-                        content=str(info),
-                        classes="detail-value",
-                        markup=True)
-                )
+                row.mount(Label(content=str(info), classes="detail-value", markup=True))
 
 
 class MainContainer(TabbedContent):
@@ -393,7 +405,7 @@ class MainContainer(TabbedContent):
         list_data: UserListData,
         prompt_data: UserPromptData,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.profile_data = profile_data
@@ -404,30 +416,20 @@ class MainContainer(TabbedContent):
         self.config_data = config_data
         self.book_by_Status = book_data.dict_by_status
 
-
     @staticmethod
     def createPromptListItem(self):
         return [
-            PromptListItem(
-                line
-            ) for line in open(self.config_data.index_file_dict["prompts"])
+            PromptListItem(line)
+            for line in open(self.config_data.index_file_dict["prompts"])
         ]
-
 
     @staticmethod
     def createProfileListItem(profile_data):
         return [
-            ProfilePublicListItem(
-                profile_data
-            ),
-            ProfileBooksListItem(
-                profile_data
-            ),
-            ProfilePersonalListItem(
-                profile_data
-            )
+            ProfilePublicListItem(profile_data),
+            ProfileBooksListItem(profile_data),
+            ProfilePersonalListItem(profile_data),
         ]
-
 
     def compose(self) -> ComposeResult:
         with TabbedContent(initial="list_books", id="tab_panel"):
@@ -446,39 +448,36 @@ class MainContainer(TabbedContent):
 
             with TabPane(title="Series", id="list_series"):
                 with Horizontal(id="button-bar"):
-                        yield Button(
-                            "Refresh",
-                            id="refresh_active",
-                            classes="general-button"
-                        )
-                        yield Button(
-                            "Remove",
-                            id="remove_series",
-                            classes="general-button",
-                            disabled=True
-                        )
+                    yield Button(
+                        "Refresh", id="refresh_active", classes="general-button"
+                    )
+                    yield Button(
+                        "Remove",
+                        id="remove_series",
+                        classes="general-button",
+                        disabled=True,
+                    )
                 yield ListView(
                     *[
                         SeriesListItem(
                             series_name=line.split("\t")[0],
                             series_count=str(line.split("\t")[1]),
-                            series_brl=line.split("\t")[2]
-                        ) for line in open(self.config_data.index_file_dict["series"])
+                            series_brl=line.split("\t")[2],
+                        )
+                        for line in open(self.config_data.index_file_dict["series"])
                     ],
-                    id="series_list"
+                    id="series_list",
                 )
 
             with TabPane(title="Lists", id="list_list"):
                 with TabbedContent(initial="status-list-followed"):
-                    with TabPane(
-                        title="Followed lists", id="status-list-followed"
-                    ):
+                    with TabPane(title="Followed lists", id="status-list-followed"):
                         yield ListView(
                             *[
                                 ListListItem(
                                     i,
                                     self.list_data.lists[i]["list_information"]["name"],
-                                    self.list_data.lists[i]
+                                    self.list_data.lists[i],
                                 )
                                 for i in self.list_data.lists
                             ]
@@ -492,77 +491,73 @@ class MainContainer(TabbedContent):
                                 SeriesListItem(
                                     series_name=line.split("\t")[0],
                                     series_count=str(line.split("\t")[1]),
-                                    series_brl=line.split("\t")[2]
-                                ) for line in open(self.config_data.index_file_dict["lists"])
+                                    series_brl=line.split("\t")[2],
+                                )
+                                for line in open(
+                                    self.config_data.index_file_dict["lists"]
+                                )
                             ],
-                            id="series_list"
+                            id="series_list",
                         )
 
             with TabPane(title="Prompts", id="list_prompt"):
                 with TabbedContent(initial="status-prompt-followed"):
-                    with TabPane(
-                        title="Followed Prompts", id="status-prompt-followed"
-                    ):
+                    with TabPane(title="Followed Prompts", id="status-prompt-followed"):
                         yield ListView(
                             *[
                                 ListListItem(
                                     i,
-                                    self.prompt_data.lists[i]["list_information"]["name"],
-                                    self.prompt_data.lists[i]
+                                    self.prompt_data.lists[i]["list_information"][
+                                        "name"
+                                    ],
+                                    self.prompt_data.lists[i],
                                 )
                                 for i in self.prompt_data.lists
                             ]
                         )
 
-
-                    with TabPane(
-                        title="Manual Follows", id="status-prompt-manual"
-                    ):
+                    with TabPane(title="Manual Follows", id="status-prompt-manual"):
                         yield ListView(
                             *[
                                 SeriesListItem(
                                     series_name=line.split("\t")[0],
                                     series_count=str(line.split("\t")[1]),
-                                    series_brl=line.split("\t")[2]
-                                ) for line in open(self.config_data.index_file_dict["prompts"])
+                                    series_brl=line.split("\t")[2],
+                                )
+                                for line in open(
+                                    self.config_data.index_file_dict["prompts"]
+                                )
                             ],
-                            id="series_list"
+                            id="series_list",
                         )
-
 
             with TabPane(title="Profile", id="profile_page"):
                 yield ListView(
-                    *self.createProfileListItem(
-                        self.profile_data
-                    ),
-                    id='list_view_profile'
+                    *self.createProfileListItem(self.profile_data),
+                    id="list_view_profile",
                 )
 
-
     def refresh_series_list(self):
-            """Reload the series list from the TSV file."""
+        """Reload the series list from the TSV file."""
 
-            # if active.pane == series
-            series_list = self.query_one("#series_list", ListView)
-            series_list.clear()
+        # if active.pane == series
+        series_list = self.query_one("#series_list", ListView)
+        series_list.clear()
 
-            with open(self.config_data.index_file_dict["series"]) as f:
-                for line in f:
-                    if not line == "\n":
-                        name, count, brl = line.strip().split("\t")
+        with open(self.config_data.index_file_dict["series"]) as f:
+            for line in f:
+                if not line == "\n":
+                    name, count, brl = line.strip().split("\t")
 
-                        # Doesn't actually get triggered... annoyingly
-                        if not os.path.exists(brl.strip()):
-                            ErrorModal(f"BRL file does not exist for: {name}")
+                    # Doesn't actually get triggered... annoyingly
+                    if not os.path.exists(brl.strip()):
+                        ErrorModal(f"BRL file does not exist for: {name}")
 
-                        series_list.append(
-                            SeriesListItem(
-                                series_name=name,
-                                series_count=str(count),
-                                series_brl=brl
-                            )
+                    series_list.append(
+                        SeriesListItem(
+                            series_name=name, series_count=str(count), series_brl=brl
                         )
-
+                    )
 
     def remove_series(self):
         series_list = self.query_one("#series_list", ListView)
@@ -599,13 +594,11 @@ class MainContainer(TabbedContent):
         remove_button = self.query_one("#remove_series", Button)
         remove_button.disabled = True
 
-
     async def on_list_view_selected(self, event: ListView.Selected) -> None:
         if event.list_view.id == "series_list":
             remove_button = self.query_one("#remove_series", Button)
             # Enable only if something is selected
             remove_button.disabled = event.item is None
-
 
     async def on_button_pressed(self, event: Button.Pressed):
         if event.button.id == "refresh_active":
@@ -618,6 +611,7 @@ class MainContainer(TabbedContent):
 
 class NCScreen(Screen):
     """Main screen with internal full-screen loading overlay."""
+
     CSS_PATH = "layout.tcss"
 
     def __init__(self, config_data):
@@ -660,15 +654,15 @@ class NCScreen(Screen):
             query=FOLLOWED_LISTS,
             api_path="lists",
             config_path=self.config_data,
-            offline=offline
+            offline=offline,
         )
 
         overlay.update_status("Loading saved Prompt data...")
-        self.prompt_data = UserPromptData (
+        self.prompt_data = UserPromptData(
             query=FOLLOWED_PROMPTS,
             api_path="prompts",
             config_path=self.config_data,
-            offline=offline
+            offline=offline,
         )
 
         overlay.update_status("Getting it Done Done Done...")
@@ -681,26 +675,24 @@ class NCScreen(Screen):
         overlay.set_timer(1.0, overlay.remove)
 
         content = self.query_one("#content")
-        await content.mount_all([
-            NCHeader(
-                id="Header",
-                classes="header",
-                user=self.profile_data.name
-            ),
-            HorizontalScroll(
-                MainContainer(
-                    id="book_list",
-                    classes="book_list",
-                    profile_data=self.profile_data,
-                    book_data=self.book_data,
-                    list_data=self.list_data,
-                    prompt_data=self.prompt_data,
-                    config_data=self.config_data,
+        await content.mount_all(
+            [
+                NCHeader(id="Header", classes="header", user=self.profile_data.name),
+                HorizontalScroll(
+                    MainContainer(
+                        id="book_list",
+                        classes="book_list",
+                        profile_data=self.profile_data,
+                        book_data=self.book_data,
+                        list_data=self.list_data,
+                        prompt_data=self.prompt_data,
+                        config_data=self.config_data,
+                    ),
+                    DetailsPanel(id="book_panel"),
                 ),
-                DetailsPanel(id="book_panel"),
-            ),
-            Footer(),
-        ])
+                Footer(),
+            ]
+        )
 
     async def on_list_view_selected(self, event: ListView.Selected) -> None:
         panel = self.query_one("#book_panel", DetailsPanel)
@@ -718,7 +710,7 @@ class NCScreen(Screen):
             isinstance(event.item, ProfilePublicListItem)
             or isinstance(event.item, ProfilePersonalListItem)
             or isinstance(event.item, ProfileBooksListItem)
-        ):            # Example: load from your CSV, dict, or database
+        ):  # Example: load from your CSV, dict, or database
             panel.update_details(event.item.data)
 
 
@@ -730,34 +722,12 @@ class NCApp(App):
 
     BINDINGS = [
         Binding(key="q", action="quit", description="Quit NC"),
-        Binding(
-            key="r",
-            action="read",
-            description="Assign Read"
-        ),
-        Binding(
-            key="s",
-            action="seriesAdd",
-            description="Add Series"
-        ),
-        Binding(
-            key="p",
-            action="promptAdd",
-            description="Add Prompt"
-        ),
-        Binding(
-            key="l",
-            action="listAdd",
-            description="Add List"
-        ),
-        Binding(
-            key="H",
-            action="hardRefesh",
-            description="Hard Refresh Everything!"
-        ),
-        Binding(
-            key="h", action="help", description="Help Panel"
-        )
+        Binding(key="r", action="read", description="Assign Read"),
+        Binding(key="s", action="seriesAdd", description="Add Series"),
+        Binding(key="p", action="promptAdd", description="Add Prompt"),
+        Binding(key="l", action="listAdd", description="Add List"),
+        Binding(key="H", action="hardRefesh", description="Hard Refresh Everything!"),
+        Binding(key="h", action="help", description="Help Panel"),
     ]
 
     def action_help(self):
@@ -780,18 +750,12 @@ class NCApp(App):
         """API move book from want-to-read to read"""
         self.push_screen(ReadModal())
 
-
     def on_mount(self) -> None:
         if not self.config_data.token and not self.config_data.email:
             self.push_screen(
                 MissingConfigOption(
-                    config_path = self.config_path,
-                    config_data = self.config_data
+                    config_path=self.config_path, config_data=self.config_data
                 )
             )
         else:
-            self.push_screen(
-                NCScreen(
-                    config_data = self.config_data
-                )
-            )
+            self.push_screen(NCScreen(config_data=self.config_data))

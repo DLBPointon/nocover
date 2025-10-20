@@ -1,6 +1,8 @@
+from typing import final
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.widgets import Static
+
 
 class LoadingScreen(Container):
     """
@@ -22,6 +24,7 @@ class LoadingScreen(Container):
         yield Static(self.ASCII_LOGO, id="ascii_logo")
         yield Static("Preparing data...", id="status_text")
 
+    @final
     def update_status(self, message: str):
         """Update the message text dynamically."""
         status = self.query_one("#status_text", Static)

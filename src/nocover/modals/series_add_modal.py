@@ -14,25 +14,27 @@ from nocover.config import Config
 
 from nocover.brl.generate_brl import generate_brl_file
 
+
 class SeriesAddModal(AddModal):
     def __init__(self, title: str, config: Config, *args, **kwargs):
         super().__init__(title, config, *args, **kwargs)
 
-        self.universe: Input        = Input(
+        self.universe: Input = Input(
             placeholder="Universe of series (optional): Warhammer",
             type="text",
-            classes="popup-text"
+            classes="popup-text",
         )
         self.universe_position: Input = Input(
-            placeholder = "Number position of series in Universe",
+            placeholder="Number position of series in Universe",
             type="text",
-            classes="popup-text"
+            classes="popup-text",
         )
-
 
     def compose(self) -> ComposeResult:
         with Vertical(id="popup"):
-            yield Label(f"So, you want to add a {self.title.title()}...", id="popup-title")
+            yield Label(
+                f"So, you want to add a {self.title.title()}...", id="popup-title"
+            )
             yield self.slug_input
             yield self.universe
             yield self.universe_position
@@ -40,12 +42,13 @@ class SeriesAddModal(AddModal):
             with Horizontal(id="popup-checkboxes"):
                 yield Checkbox("Include Tags", id="opt_tags", value=True)
                 yield Checkbox("Include Ghost Volumes", id="opt_ghosts", value=False)
-                yield Checkbox("Include Compilations", id="opt_compilations", value=False)
+                yield Checkbox(
+                    "Include Compilations", id="opt_compilations", value=False
+                )
 
             with Horizontal(id="popup-buttons"):
                 yield Button("Save", id="save", variant="success")
                 yield Button("Cancel", id="cancel", variant="primary")
-
 
     def validate_series(self, slug):
         """
@@ -53,14 +56,10 @@ class SeriesAddModal(AddModal):
         """
         new_query: str = SEARCH_SERIES.replace("SLUG", f'"{self.slug_input.value}"')
 
-        reqHeaders: dict[str, str] = {
-            'Authorization': self.config_token
-        }
+        reqHeaders: dict[str, str] = {"Authorization": self.config_token}
 
         response = requests.post(
-            url     = self.db_url,
-            headers = reqHeaders,
-            json    = {"query": new_query}
+            url=self.db_url, headers=reqHeaders, json={"query": new_query}
         )
 
         if response.status_code == 200:
@@ -69,22 +68,24 @@ class SeriesAddModal(AddModal):
         else:
             return False, False
 
-
-    def reformat_series_data(self, data):
+    def reformat_series_data(self, data) -> dict[str, str | bool]:
         return {
-            "name" :                data["name"],
-            "author_name" :         data["author"]["name"],
-            "author_personal" :     data["author"]["name_personal"],
-            "series_slug" :         self.slug_input.value,
-            "series_universe" :     "NA" if self.universe.value is None else self.universe.value,
-            "series_universe_pos":  "NA" if self.universe_position.value is None else self.universe_position.value,
-            "series_description" :  data["description"],
-            "series_creator" :      data["creator"],
-            "series_completed" :    data["is_completed"],
-            "slug_match" :          (True if data["slug"] == self.universe.value else False),
-            "series_book_count" :   data["books_count"]
+            "name": data["name"],
+            "author_name": data["author"]["name"],
+            "author_personal": data["author"]["name_personal"],
+            "series_slug": self.slug_input.value,
+            "series_universe": "NA"
+            if self.universe.value is None
+            else self.universe.value,
+            "series_universe_pos": "NA"
+            if self.universe_position.value is None
+            else self.universe_position.value,
+            "series_description": data["description"],
+            "series_creator": data["creator"],
+            "series_completed": data["is_completed"],
+            "slug_match": (True if data["slug"] == self.universe.value else False),
+            "series_book_count": data["books_count"],
         }
-
 
     def remove_ghosts(self, data):
         """
@@ -103,7 +104,6 @@ class SeriesAddModal(AddModal):
 
         return book_list, ghosts
 
-
     def remove_editions(self, data):
         """
         Shrink the list by keeping only the canonical slug book.
@@ -116,7 +116,6 @@ class SeriesAddModal(AddModal):
                 book_list.append(i)
 
         return book_list
-
 
     def remove_compilations(self, data):
         """
@@ -134,7 +133,6 @@ class SeriesAddModal(AddModal):
                 yes_compilations.append(i["book"]["slug"])
 
         return book_list, yes_compilations
-
 
     def clean_book_data(self, data):
         """
@@ -158,22 +156,18 @@ class SeriesAddModal(AddModal):
 
         return out_data, yes_ghosts, yes_compilations
 
-
     def reformat_book_data(self, data):
         clean_book_list, ghosts, compilations = self.clean_book_data(data)
         book_list = self.get_book_list(clean_book_list, "series")
         return {
-            "raw_book_count" :      len(data),
-            "clean_book_count" :    len(book_list),
-            "series_ghosts" :       ghosts,
-            "series_compilations" : compilations,
-            "book_data" :           sorted(
-                                        book_list,
-                                        key=lambda x: x.series_position,
-                                        reverse=False
-                                    )
+            "raw_book_count": len(data),
+            "clean_book_count": len(book_list),
+            "series_ghosts": ghosts,
+            "series_compilations": compilations,
+            "book_data": sorted(
+                book_list, key=lambda x: x.series_position, reverse=False
+            ),
         }
-
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save":
@@ -188,23 +182,27 @@ class SeriesAddModal(AddModal):
 
             brl_location: str = save_location + self.slug_input.value + ".brl"
             if not os.path.exists(brl_location):
-                reformatted_series_data: dict[str, str] = self.reformat_series_data(series_data)
+                reformatted_series_data: dict[str, str] = self.reformat_series_data(
+                    series_data
+                )
 
-                reformatted_book_data: dict[str, str] = self.reformat_book_data(book_data)
+                reformatted_book_data: dict[str, str] = self.reformat_book_data(
+                    book_data
+                )
 
                 if len(reformatted_book_data["book_data"]) == 0:
                     self.app.push_screen(
-                        ErrorModal(f"{reformatted_series_data["name"]} has 0 books!")
+                        ErrorModal(f"{reformatted_series_data['name']} has 0 books!")
                     )
 
                 # Generate a book-reading-list file for series
                 generate_brl_file(
-                    book_list = reformatted_book_data["book_data"],
-                    save_location = brl_location,
-                    series_data = reformatted_series_data,
-                    add_tags = self.query_one("#opt_tags", Checkbox).value,
-                    universe = self.universe.value,
-                    universe_position = self.universe_position.value
+                    book_list=reformatted_book_data["book_data"],
+                    save_location=brl_location,
+                    series_data=reformatted_series_data,
+                    add_tags=self.query_one("#opt_tags", Checkbox).value,
+                    universe=self.universe.value,
+                    universe_position=self.universe_position.value,
                 )
 
                 # Output these too?
@@ -215,14 +213,16 @@ class SeriesAddModal(AddModal):
                 self.update_index_file(
                     reformatted_series_data["name"],
                     reformatted_book_data["clean_book_count"],
-                    save_location + reformatted_series_data["series_slug"] + ".brl\n"
+                    save_location + reformatted_series_data["series_slug"] + ".brl\n",
                 )
 
                 self.dismiss("saved")
 
             else:
                 self.app.push_screen(
-                    ErrorModal("Series already exists! (Rebuilding a series is on the TODO list)")
+                    ErrorModal(
+                        "Series already exists! (Rebuilding a series is on the TODO list)"
+                    )
                 )
 
         elif event.button.id == "cancel":

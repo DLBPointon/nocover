@@ -2,8 +2,9 @@ from textual.widgets import ListItem, Label
 
 from nocover.hardcover.get_profile import Profile
 
+
 class BookListItem(ListItem):
-    def __init__(self, book_data: dict):
+    def __init__(self, book_data: dict[str, str]):
         name = book_data["title"]
         super().__init__(Label(name))
         self.book_data = book_data
@@ -18,7 +19,7 @@ class SeriesListItem(ListItem):
 
 
 class ListListItem(ListItem):
-    def __init__(self, slug: str, name: str, list_data: dict ):
+    def __init__(self, slug: str, name: str, list_data: dict[str, str]):
         super().__init__(Label(name))
         self.list_name = name
         self.list_slug = slug
