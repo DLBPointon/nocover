@@ -1,16 +1,20 @@
 import requests
+import logging
 from pathlib import Path
 
 from textual.screen import ModalScreen
 from textual.widgets import Input, Label, Button
 from textual.containers import Vertical, Horizontal
 from textual.app import ComposeResult
+
 from nocover.modals.error_page import ErrorModal
 
 from nocover.config import Config
 
 from nocover.brl.book import Book
 from nocover.brl.list_book import ListBook
+
+logger = logging.getLogger(__name__)
 
 
 class AddModal(ModalScreen):
@@ -29,6 +33,8 @@ class AddModal(ModalScreen):
         self.save_location: Input = Input(
             placeholder=config.default_folders[title], type="text", classes="popup-text"
         )
+
+        logger.info(f"ADD : {self.title} : {self.slug_input.value}")
 
     def compose(self) -> ComposeResult:
         with Vertical(id="popup"):

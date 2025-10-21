@@ -23,6 +23,8 @@ Yeah, a TUI for this doesn't need to be a thing. However, I've wanted to make a 
 
 - [ ] Search for book to add to `want-to-read`, `read` or a local private list.
 - [ ] General Improvements to displaying data
+- [ ] Consolidate Series/Prompt/List brl reading
+    - Might be a pain considering that each have different named values.
 - [ ] Tick toggle to add books to `want-to-read`
 - [ ] Fully offline use
     - required downloading and storing of data in format that is easy to access.
@@ -31,7 +33,7 @@ Yeah, a TUI for this doesn't need to be a thing. However, I've wanted to make a 
 - [ ] Book Editor Modal
 - [ ] Add book descriptions to brl file generation
 - [ ] Add another...? To a modal.
-- [ ] Add Logging
+- [X] Add Logging @ 21/10/2025
 
 ### Pre-November updates
 - [X] In case it could be used in another tool, choose where to save a BRL whilst defaulting to Config.SeriesPath

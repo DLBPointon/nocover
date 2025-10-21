@@ -10,6 +10,7 @@ from datetime import date
 from nocover.ui import NCApp
 from nocover.appinfo import APP_NAME, VERSION, DESCRIPTION
 
+logger = logging.getLogger(__name__)
 
 def parse_args(argv=None):
     parser = argparse.ArgumentParser(
@@ -30,7 +31,7 @@ def parse_args(argv=None):
     return parser.parse_args()
 
 
-def get_the_logger(log_path: str) -> None:
+def _get_the_logger(log_path: str) -> None:
     """
     Logging setup is based on James Murphy video
     https://www.youtube.com/watch?v=9L77QExPmI0
@@ -55,8 +56,6 @@ def get_the_logger(log_path: str) -> None:
 def main():
     args = parse_args(argv=None)
 
-    logger = logging.getLogger(__name__)
-
     filename = f"{args.config}/logs/"
     Path.mkdir(Path(filename), exist_ok=True, parents=True)
 
@@ -64,7 +63,7 @@ def main():
     today: date = date.today()
     full_logger_path = f"{filename}/NC_Y{today.year}_M{today.month}_D{today.day}.log"
 
-    get_the_logger(full_logger_path)
+    _get_the_logger(full_logger_path)
 
     if not Path(args.config).is_dir():
         logger.info(f"Making config dir @ {args.config}")

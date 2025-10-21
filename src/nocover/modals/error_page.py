@@ -1,6 +1,10 @@
+import logging
+
 from textual.screen import ModalScreen
 from textual.containers import Vertical
 from textual.widgets import Static, Button
+
+logger = logging.getLogger(__name__)
 
 
 class ErrorModal(ModalScreen):
@@ -11,6 +15,8 @@ class ErrorModal(ModalScreen):
     def __init__(self, message: str):
         super().__init__()
         self.message = message
+
+        logger.error(self.message)
 
     def compose(self):
         with Vertical(classes="error-box"):

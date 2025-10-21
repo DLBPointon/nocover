@@ -1,6 +1,7 @@
 # General Package Imports
 import os
 from typing import final
+import logging
 
 # Textual Package Import
 from textual.app import App, ComposeResult
@@ -61,6 +62,8 @@ DEFAULT_BOOK_COVER = """
 +-------------+
 """
 
+logger = logging.getLogger(__name__)
+
 
 class MissingConfigOption(ModalScreen[None]):
     """ """
@@ -68,6 +71,7 @@ class MissingConfigOption(ModalScreen[None]):
     def __init__(self, config_path: str, config_data: Config) -> None:
         super().__init__()
         self.config_path: str = config_path
+        self.full_path: str = config_path + "/.config"
         self.config_data: Config = config_data
         self.config_input: Input = Input(placeholder="Hardcover Token")
         self.email_input: Input = Input(placeholder="eto_demerzel@trantor.empire")
@@ -88,7 +92,7 @@ class MissingConfigOption(ModalScreen[None]):
         if event.button.id == "save":
             # validated_input = self.validate_config_input()
 
-            with open(self.config_path + "/.config", "w") as f:
+            with open(self.full_path, "w") as f:
                 data: dict[str, str] = {
                     "HARDCOVER_API_TOKEN": self.config_input.value,
                     "EMAIL": self.email_input.value,
@@ -99,8 +103,10 @@ class MissingConfigOption(ModalScreen[None]):
             self.app.push_screen(
                 NCScreen(Config(self.config_path))
             )  # go to main screen
+            logger.info(f"NC-CONFIG data saved to {self.full_path}")
 
         elif event.button.id == "cancel":
+            logger.info("User cancelled config setup, why tho?")
             self.app.exit("User cancelled config setup.")
 
 
@@ -571,6 +577,8 @@ class MainContainer(TabbedContent):
         series_count = item.series_count
         series_brl = item.series_brl
 
+        logger.debug(f"REMOVING : SERIES : {series_name} : {series_brl}")
+
         # Remove from UI
         item.remove()
 
@@ -642,6 +650,7 @@ class NCScreen(Screen):
         )
 
         overlay.update_status("Loading Book data...")
+        logger.debug("GET Book data")
         self.book_data = UserBookData(
             query=HARDCOVER_USER_BOOKS_BY_STATUS,
             api_path="user_books",
@@ -650,6 +659,7 @@ class NCScreen(Screen):
         )
 
         overlay.update_status("Loading saved List data...")
+        logger.debug("GET List data")
         self.list_data = UserListData(
             query=FOLLOWED_LISTS,
             api_path="lists",
@@ -658,6 +668,7 @@ class NCScreen(Screen):
         )
 
         overlay.update_status("Loading saved Prompt data...")
+        logger.debug("GET Prompt data")
         self.prompt_data = UserPromptData(
             query=FOLLOWED_PROMPTS,
             api_path="prompts",
@@ -698,12 +709,16 @@ class NCScreen(Screen):
         panel = self.query_one("#book_panel", DetailsPanel)
 
         if isinstance(event.item, BookListItem):
-            panel.update_details(event.item.book_data)
+            logger.info(f"LOAD data : BOOK : {event.item.name} ")
+            panel.update_details(event.item.name)
 
         if isinstance(event.item, ListListItem):
+            logger.info(f"LOAD data : LIST : {event.item.list_name}")
             panel.update_list_details(event.item.list_data, event.item.book_data)
 
         if isinstance(event.item, SeriesListItem):
+            # brl strings contain \n
+            logger.info(f"LOAD data : SERIES/PROMPT : {event.item.series_name} : {event.item.series_brl.strip()}")
             panel.update_series_details(SeriesBrlData(event.item.series_brl))
 
         if (
@@ -711,6 +726,7 @@ class NCScreen(Screen):
             or isinstance(event.item, ProfilePersonalListItem)
             or isinstance(event.item, ProfileBooksListItem)
         ):  # Example: load from your CSV, dict, or database
+            logger.info("Pulling up personal info")
             panel.update_details(event.item.data)
 
 
@@ -748,14 +764,36 @@ class NCApp(App):
 
     def action_read(self):
         """API move book from want-to-read to read"""
-        self.push_screen(ReadModal())
+        self._book_now_read()
 
     def on_mount(self) -> None:
         if not self.config_data.token and not self.config_data.email:
+            logger.info(f"NC-CONFIG data missing... open config modal")
             self.push_screen(
                 MissingConfigOption(
                     config_path=self.config_path, config_data=self.config_data
                 )
             )
         else:
+            logger.info(f"NC-CONFIG data found in path {self.config_path}!")
             self.push_screen(NCScreen(config_data=self.config_data))
+
+    def _ping_api(item, move_to="read"):
+        # query_to_db
+        # if return not ok:
+            # ErrorModal(f"Can't ping the HC_DB to move {item} to {move_to}")
+        pass
+
+    def _book_now_read(self):
+        # logger.info(f"MOVE : BOOK : {item} -> {move_to}")
+        # get current highlighted book
+        # what is name of tab
+        # if tab == "want-to-read"
+        #   ping_api(item)
+        # if tab == "read"
+        #   ping_api(move_to="want-to-read", item)
+        # else
+        #   ErrorModal("Dang, how'd you get a list that doesn't exist?")
+        #
+        # RefreshScren()
+        pass
