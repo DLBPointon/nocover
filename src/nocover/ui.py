@@ -227,7 +227,7 @@ class DetailsPanel(Static):
                     book_block.mount(row)
 
     def update_list_details(
-        self, list_data: dict[str, str], book_data: dict[str, str]
+        self, list_data, book_data
     ) -> None:
         container = self.query_one("#details_rows", VerticalScroll)
         container.remove_children()
