@@ -54,7 +54,7 @@ class AddModal(ModalScreen):
         try:
             Path(self.save_location).mkdir(parents=True, exist_ok=True)
             return self.save_location
-        except:
+        except PermissionError:
             ErrorModal(f"Can't make directory for: {self.save_location}")
             # Might need to be something here
 

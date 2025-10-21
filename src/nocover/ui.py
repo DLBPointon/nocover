@@ -1,6 +1,5 @@
 # General Package Imports
 import os
-from typing import final
 import logging
 
 # Textual Package Import
@@ -38,7 +37,6 @@ from nocover.modals.error_page import ErrorModal
 from nocover.modals.series_add_modal import SeriesAddModal
 from nocover.modals.list_add_modal import ListAddModal
 from nocover.modals.prompt_add_modal import PromptAddModal
-from nocover.modals.read_modal import ReadModal
 
 # Local App Hardcover Imports
 from nocover.hardcover.raw_queries import (
@@ -768,7 +766,7 @@ class NCApp(App):
 
     def on_mount(self) -> None:
         if not self.config_data.token and not self.config_data.email:
-            logger.info(f"NC-CONFIG data missing... open config modal")
+            logger.info("NC-CONFIG data missing... open config modal")
             self.push_screen(
                 MissingConfigOption(
                     config_path=self.config_path, config_data=self.config_data
