@@ -29,6 +29,7 @@ class Config:
         self._validate_folders()
         self._validate_index_files()
 
+
     def get_item(self, config_dict: dict[str, str], config_key: str):
         return (
             config_dict[config_key]
@@ -36,12 +37,14 @@ class Config:
             else False
         )
 
+
     def _validate_folders(self):
         for _x, y in self.default_folders.items():
             try:
                 Path(y).mkdir(parents=True, exist_ok=True)
             except FileNotFoundError:
                 _ = ErrorModal(f"Can't make folder: {y}!")
+
 
     def _validate_index_files(self):
         for x, y in self.index_file_dict.items():
@@ -51,6 +54,7 @@ class Config:
             except PermissionError:
                 _ = ErrorModal(f"Can't make Index file: {y}")
 
+
     def config_check(self):
         full_path = f"{self.path}/.config"
         if Path(full_path).is_file():
@@ -58,6 +62,7 @@ class Config:
         else:
             _ = Path(full_path).write_text("")
             return False
+
 
     def read_config(self, full_path: str) -> Any:
         try:

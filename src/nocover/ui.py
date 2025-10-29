@@ -707,8 +707,8 @@ class NCScreen(Screen):
         panel = self.query_one("#book_panel", DetailsPanel)
 
         if isinstance(event.item, BookListItem):
-            logger.info(f"LOAD data : BOOK : {event.item.name} ")
-            panel.update_details(event.item.name)
+            logger.info(f"LOAD data : BOOK : {event.item.book_name} ")
+            panel.update_details(event.item.book_data)
 
         if isinstance(event.item, ListListItem):
             logger.info(f"LOAD data : LIST : {event.item.list_name}")

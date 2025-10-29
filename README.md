@@ -23,7 +23,8 @@ Yeah, a TUI for this doesn't need to be a thing. However, I've wanted to make a 
 
 - [ ] Search for book to add to `want-to-read`, `read` or a local private list.
 - [ ] General Improvements to displaying data
-- [ ] Consolidate Series/Prompt/List brl reading
+    - there's more data stord than shown, it's because it's not named the same that it isn't shown. I don't reaaaaly want to end up with `book if book elif list_book elif prompt_book elif series_book` sort of logic in there.
+- [ ] Consolidate Series/Prompt/List brl reading and generation
     - Might be a pain considering that each have different named values.
 - [ ] Tick toggle to add books to `want-to-read`
 - [ ] Fully offline use

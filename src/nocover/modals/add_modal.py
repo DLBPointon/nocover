@@ -36,6 +36,7 @@ class AddModal(ModalScreen):
 
         logger.info(f"ADD : {self.title} : {self.slug_input.value}")
 
+
     def compose(self) -> ComposeResult:
         with Vertical(id="popup"):
             yield Label(

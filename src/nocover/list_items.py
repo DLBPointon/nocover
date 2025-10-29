@@ -5,8 +5,8 @@ from nocover.hardcover.get_profile import Profile
 
 class BookListItem(ListItem):
     def __init__(self, book_data: dict[str, str]):
-        self.name = book_data["title"]
-        super().__init__(Label(self.name))
+        super().__init__(Label(book_data["title"]))
+        self.book_name = book_data["title"]
         self.book_data = book_data
 
 
